@@ -334,18 +334,45 @@ function importModel(data) {
   updateVoxelVisibility(); // Reapply visibility logic after changes
 }
 
-function exportModel() {
+async function exportModel() {
   const model = Array.from(voxelData.entries()).map(([key, color]) => {
     const [x, y, z] = key.split(',').map(Number);
     return { x, y, z, color };
   });
-  const blob = new Blob([JSON.stringify(model)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'model.json';
-  link.click();
-  URL.revokeObjectURL(url);
+
+  const filename = `model-${Date.now()}.json`;
+  const json = JSON.stringify(model, null, 2); // Pretty-print
+
+  if ('showSaveFilePicker' in window) {
+    try {
+      const fileHandle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [
+          {
+            description: 'JSON file',
+            accept: { 'application/json': ['.json'] },
+          },
+        ],
+      });
+
+      const writable = await fileHandle.createWritable();
+      await writable.write(json);
+      await writable.close();
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Save failed:', err);
+      }
+    }
+  } else {
+    // Fallback: force download via link
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 }
 
 // Bind events
