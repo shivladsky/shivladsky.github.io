@@ -1,0 +1,83 @@
+html,
+body {
+  font-family: 'VT323', monospace;
+  color: #ededed;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  background-color: black;
+}
+
+#titleOverlay {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  font-size: 64px;
+  color: #ededed;
+  pointer-events: none;
+}
+
+#topLeftLinks {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+}
+
+#topLeftLinks a {
+  font-size: 36px;
+  color: #ededed;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+#topLeftLinks a:hover {
+  color: white;
+}
+
+#colorPalettePanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 100vh;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 20;
+  box-sizing: border-box;
+}
+
+.colorSquare {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 16px;
+  min-width: 16px;
+  border: 2px solid #000;
+  box-sizing: border-box;
+  cursor: pointer;
+  background-color: #000; /* placeholder color */
+}
+
+.colorSquare:hover {
+  transform: scale(1.1);
+  border-color: #fff;
+}
+
+.colorSquare.active {
+  transform: scale(1.1);
+  border-color: #fff;
+}
