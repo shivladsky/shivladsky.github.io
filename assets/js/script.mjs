@@ -298,14 +298,25 @@ function exportModel() {
 
 function importModel(data) {
   voxelData.clear();
-  for (const { x, y, z, color } of data) {
+
+  // Reset every dot to blank state
+  for (const dot of dots) {
+    dot.material.color.set(COLORS.base);
+    dot.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1);
+  }
+
+  // Apply imported voxel data
+  for (const { x, y, z } of data) {
     const coord = `${x},${y},${z}`;
     voxelData.set(coord, 1);
+    const dot = dots.find((d) => d.userData.coord === coord);
+    if (dot) {
+      dot.material.color.set(COLORS.active);
+      dot.scale.set(voxelSize, voxelSize, 1); // Full size for active voxel
+    }
   }
-  for (const dot of dots) {
-    const coord = dot.userData.coord;
-    dot.material.color.set(voxelData.has(coord) ? COLORS.active : COLORS.base);
-  }
+
+  updateVoxelVisibility(); // Reapply visibility logic after changes
 }
 
 // Bind events
