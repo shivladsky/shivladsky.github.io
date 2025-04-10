@@ -7,6 +7,8 @@ const COLORS = {
   hover: '#EDEDED',
 };
 
+let selectedColor = COLORS.active; // Default to green
+
 // VOLUMETRIK-01 Starter - 16x16x16cm cube with 10mm points
 const canvas = document.getElementById('viewportCanvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -131,8 +133,8 @@ function tryPaintVoxel(e) {
       }
     } else {
       if (!voxelData.has(coord)) {
-        voxelData.set(coord, 1);
-        obj.material.color.set(COLORS.active);
+        voxelData.set(coord, selectedColor);
+        obj.material.color.set(selectedColor);
       }
     }
   }
@@ -244,7 +246,8 @@ function animate() {
   if (hovered) {
     const coord = hovered.userData.coord;
     const isFilled = voxelData.has(coord);
-    hovered.material.color.set(isFilled ? COLORS.active : COLORS.base);
+    const color = isFilled ? voxelData.get(coord) : COLORS.base;
+    hovered.material.color.set(color);
     hovered.scale.set(
       voxelSize * (isFilled ? 1.0 : 0.5),
       voxelSize * (isFilled ? 1.0 : 0.5),
@@ -270,9 +273,22 @@ async function loadDefaultPalette() {
     const paletteSquares = document.querySelectorAll(
       '#colorPalettePanel .colorSquare'
     );
+
     paletteSquares.forEach((square, index) => {
       if (palette[index]) {
-        square.style.backgroundColor = palette[index];
+        const colorHex = palette[index];
+        square.style.backgroundColor = colorHex;
+
+        square.addEventListener('click', () => {
+          // Update selectedColor
+          selectedColor = colorHex;
+
+          // Highlight active square
+          document
+            .querySelectorAll('#colorPalettePanel .colorSquare')
+            .forEach((sq) => sq.classList.remove('active'));
+          square.classList.add('active');
+        });
       }
     });
   } catch (error) {
@@ -305,12 +321,12 @@ function importModel(data) {
   }
 
   // Apply imported voxel data
-  for (const { x, y, z } of data) {
+  for (const { x, y, z, color } of data) {
     const coord = `${x},${y},${z}`;
-    voxelData.set(coord, 1);
+    voxelData.set(coord, color);
     const dot = dots.find((d) => d.userData.coord === coord);
     if (dot) {
-      dot.material.color.set(COLORS.active);
+      dot.material.color.set(color);
       dot.scale.set(voxelSize, voxelSize, 1); // Full size for active voxel
     }
   }
@@ -319,9 +335,9 @@ function importModel(data) {
 }
 
 function exportModel() {
-  const model = Array.from(voxelData.entries()).map(([key]) => {
+  const model = Array.from(voxelData.entries()).map(([key, color]) => {
     const [x, y, z] = key.split(',').map(Number);
-    return { x, y, z, color: COLORS.active };
+    return { x, y, z, color };
   });
   const blob = new Blob([JSON.stringify(model)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
