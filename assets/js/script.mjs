@@ -434,4 +434,21 @@ document.getElementById('openLink').addEventListener('click', () => {
 });
 document.getElementById('downloadLink').addEventListener('click', exportModel);
 
+canvas.addEventListener(
+  'wheel',
+  (e) => {
+    // Two-finger horizontal swipe on Mac trackpad
+    const isHorizontalSwipe = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+
+    if (isHorizontalSwipe) {
+      const rotationSpeed = 0.003;
+      voxelGroup.rotation.y += e.deltaX * rotationSpeed;
+
+      // Prevent browser history back/forward
+      e.preventDefault();
+    }
+  },
+  { passive: false } // Needed for preventDefault() to work
+);
+
 animate();
