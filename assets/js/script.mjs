@@ -617,20 +617,16 @@ document.addEventListener('keydown', (e) => {
 
   // --- UNDO / REDO ---
   else if (
-    keyState.has('Meta') &&
-    keyState.has('Shift') &&
-    (e.key === 'z' || e.key === 'Z')
+    (e.metaKey && e.shiftKey && e.key.toLowerCase() === 'z') || // Cmd+Shift+Z → Redo (Mac)
+    (e.ctrlKey && e.key.toLowerCase() === 'y') // Ctrl+Y → Redo (Win)
   ) {
-    // Cmd+Shift+Z → Redo (Mac)
     undoManager.redo();
     e.preventDefault();
-  } else if (e.metaKey && e.key.toLowerCase() === 'z') {
-    // Cmd+Z → Undo (Mac)
+  } else if (
+    (e.metaKey && e.key.toLowerCase() === 'z') || // Cmd+Z → Undo (Mac)
+    (e.ctrlKey && e.key.toLowerCase() === 'z') // Ctrl+Z → Undo (Win)
+  ) {
     undoManager.undo();
-    e.preventDefault();
-  } else if (e.ctrlKey && e.key.toLowerCase() === 'y') {
-    // Ctrl+Y → Redo (Windows)
-    undoManager.redo();
     e.preventDefault();
   }
 });
