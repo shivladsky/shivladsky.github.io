@@ -1,4 +1,5 @@
 import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js';
+import { UndoManager } from './undo.mjs';
 
 // Color palette
 const COLORS = {
@@ -70,6 +71,15 @@ for (let x = 0; x < pointsPerAxis; x++) {
 }
 
 let showEmptyVoxels = true;
+const undoManager = new UndoManager(
+  voxelData,
+  dots,
+  updateVoxelVisibility,
+  COLORS,
+  voxelSize,
+  baseMaterial
+);
+
 updateLayerVisibility();
 
 let hovered = null;
@@ -88,7 +98,8 @@ function onMouseDown(e) {
     previousMousePosition = { x: e.clientX, y: e.clientY };
   } else if (e.button === 0) {
     isLeftMouseDown = true;
-    tryPaintVoxel(e); // Pass the event to ensure modifier keys are checked
+    undoManager.beginStroke(e.ctrlKey || e.metaKey ? 'erase' : 'paint');
+    tryPaintVoxel(e);
   }
 }
 
@@ -110,6 +121,7 @@ function onMouseMove(e) {
 }
 
 function onMouseUp() {
+  undoManager.endStroke();
   isDragging = false;
   isLeftMouseDown = false;
 }
@@ -119,25 +131,43 @@ function tryPaintVoxel(e) {
   const intersects = raycaster
     .intersectObjects(dots, false)
     .filter((obj) => obj.object.visible);
-  if (intersects.length > 0) {
-    const obj = intersects[0].object;
-    const coord = obj.userData.coord;
 
-    // Make sure e is defined and then check the modifier keys
-    const isDeleteMode = e && (e.ctrlKey || e.metaKey);
+  if (intersects.length === 0) return false;
 
-    if (isDeleteMode) {
-      if (voxelData.has(coord)) {
-        voxelData.delete(coord);
-        obj.material.color.set(COLORS.base);
-      }
-    } else {
-      if (!voxelData.has(coord)) {
-        voxelData.set(coord, selectedColor);
-        obj.material.color.set(selectedColor);
-      }
+  const obj = intersects[0].object;
+  const coord = obj.userData.coord;
+
+  // Determine if we're in deletion (erase) mode.
+  const isDeleteMode = e && (e.ctrlKey || e.metaKey);
+
+  // If not in deletion mode and the voxel is already painted, do nothing.
+  if (!isDeleteMode && voxelData.has(coord)) return false;
+
+  const oldColor = voxelData.get(coord) || COLORS.base;
+  const newColor = isDeleteMode ? COLORS.base : selectedColor;
+
+  // If the intended color is the same as the current color, nothing to do.
+  if (oldColor === newColor) return false;
+
+  undoManager.recordChange(coord, oldColor, newColor);
+
+  if (isDeleteMode) {
+    voxelData.delete(coord);
+    obj.material = baseMaterial;
+    obj.material.color.set(COLORS.base);
+    obj.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1);
+  } else {
+    voxelData.set(coord, selectedColor);
+    if (obj.material === baseMaterial) {
+      obj.material = obj.material.clone();
     }
+    obj.material.color.set(selectedColor);
+    obj.scale.set(voxelSize, voxelSize, 1);
   }
+
+  // Set the final color
+  obj.material.color.set(newColor);
+  return true;
 }
 
 function updateLayerVisibility() {
@@ -247,19 +277,32 @@ function animate() {
     const coord = hovered.userData.coord;
     const isFilled = voxelData.has(coord);
     const color = isFilled ? voxelData.get(coord) : COLORS.base;
+
+    // If it's empty, reset to shared base material
+    if (!isFilled) {
+      hovered.material = baseMaterial;
+    }
+
     hovered.material.color.set(color);
     hovered.scale.set(
       voxelSize * (isFilled ? 1.0 : 0.5),
       voxelSize * (isFilled ? 1.0 : 0.5),
       1
     );
+
     hovered = null;
   }
 
   if (intersects.length > 0) {
     hovered = intersects[0].object;
+
+    // Prevent shared base material from being mutated
+    if (hovered.material === baseMaterial) {
+      hovered.material = hovered.material.clone();
+    }
+
     hovered.material.color.set(COLORS.hover);
-    hovered.scale.set(voxelSize, voxelSize, 1); // Scale up to full on hover
+    hovered.scale.set(voxelSize, voxelSize, 1);
   }
 
   updateVoxelVisibility(); // Real-time visibility update
@@ -308,6 +351,9 @@ function resetModel(e) {
     dot.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1); // Back to default size
   }
 
+  // Clear the undo/redo history
+  undoManager.clearHistory();
+
   updateVoxelVisibility();
 }
 
@@ -330,6 +376,9 @@ function importModel(data) {
       dot.scale.set(voxelSize, voxelSize, 1); // Full size for active voxel
     }
   }
+
+  // Clear undo/redo history after import
+  undoManager.clearHistory();
 
   updateVoxelVisibility(); // Reapply visibility logic after changes
 }
@@ -381,42 +430,72 @@ canvas.addEventListener('mousemove', onMouseMove);
 canvas.addEventListener('mouseup', onMouseUp);
 canvas.addEventListener('mouseleave', onMouseUp);
 
+const keyState = new Set();
+
 document.addEventListener('keydown', (e) => {
+  keyState.add(e.key);
+
   const isShift = e.shiftKey;
 
+  // --- PAINTING CONTROLS ---
   if (isShift && e.key.toLowerCase() === 'q') {
-    // Shift + q → show only bottom layer
+    // Shift + Q → show only bottom layer
     visibleLayerCount = 1;
     updateLayerVisibility();
     e.preventDefault();
   } else if (isShift && e.key.toLowerCase() === 'e') {
-    // Shift + e → show all layers
+    // Shift + E → show all layers
     visibleLayerCount = pointsPerAxis;
     updateLayerVisibility();
     e.preventDefault();
   } else if (!isShift && e.key.toLowerCase() === 'q') {
-    // q → hide one layer
+    // Q → hide one layer
     if (visibleLayerCount > 1) {
       visibleLayerCount--;
       updateLayerVisibility();
     }
     e.preventDefault();
   } else if (!isShift && e.key.toLowerCase() === 'e') {
-    // e → show one more layer
+    // E → show one more layer
     if (visibleLayerCount < pointsPerAxis) {
       visibleLayerCount++;
       updateLayerVisibility();
     }
     e.preventDefault();
   } else if (e.key.toLowerCase() === 'r') {
+    // R → toggle xray
     xrayMode = !xrayMode;
     updateVoxelVisibility();
     e.preventDefault();
   } else if (e.key === 'Tab') {
+    // Tab → toggle empty voxel visibility
     showEmptyVoxels = !showEmptyVoxels;
     updateVoxelVisibility();
     e.preventDefault();
   }
+
+  // --- UNDO / REDO ---
+  else if (
+    keyState.has('Meta') &&
+    keyState.has('Shift') &&
+    (e.key === 'z' || e.key === 'Z')
+  ) {
+    // Cmd+Shift+Z → Redo (Mac)
+    undoManager.redo();
+    e.preventDefault();
+  } else if (e.metaKey && e.key.toLowerCase() === 'z') {
+    // Cmd+Z → Undo (Mac)
+    undoManager.undo();
+    e.preventDefault();
+  } else if (e.ctrlKey && e.key.toLowerCase() === 'y') {
+    // Ctrl+Y → Redo (Windows)
+    undoManager.redo();
+    e.preventDefault();
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  keyState.delete(e.key);
 });
 
 document.getElementById('resetLink').addEventListener('click', resetModel);
