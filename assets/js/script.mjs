@@ -50,6 +50,7 @@ scene.add(voxelGroup);
 // Start with only bottom layer visible
 let visibleLayerCount = 1;
 let xrayMode = false;
+let fillMode = false;
 
 // Create all dots
 const dots = [];
@@ -92,14 +93,20 @@ let previousMousePosition = { x: 0, y: 0 };
 
 function onMouseDown(e) {
   if (e.button === 2) {
-    // Right-click only for rotation
+    // Right-click for rotation
     isDragging = true;
     dragButton = 2;
     previousMousePosition = { x: e.clientX, y: e.clientY };
   } else if (e.button === 0) {
-    isLeftMouseDown = true;
-    undoManager.beginStroke(e.ctrlKey || e.metaKey ? 'erase' : 'paint');
-    tryPaintVoxel(e);
+    if (fillMode) {
+      // In fill mode, run the fill operation once
+      fillAtVoxel(e);
+    } else {
+      // Otherwise, use normal painting
+      isLeftMouseDown = true;
+      undoManager.beginStroke(e.ctrlKey || e.metaKey ? 'erase' : 'paint');
+      tryPaintVoxel(e);
+    }
   }
 }
 
@@ -168,6 +175,129 @@ function tryPaintVoxel(e) {
   // Set the final color
   obj.material.color.set(newColor);
   return true;
+}
+
+function fillAtVoxel(e) {
+  // Use the raycaster to find the target voxel
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster
+    .intersectObjects(dots, false)
+    .filter((obj) => obj.object.visible);
+  if (intersects.length === 0) return;
+
+  const targetObj = intersects[0].object;
+  const startCoordStr = targetObj.userData.coord;
+  const [startX, startY, startZ] = startCoordStr.split(',').map(Number);
+  const startCoord = { x: startX, y: startY, z: startZ };
+
+  // Determine the current color at the start voxel.
+  const currentColor = voxelData.has(startCoordStr)
+    ? voxelData.get(startCoordStr)
+    : COLORS.base;
+  const newColor = selectedColor;
+  if (currentColor === newColor) return;
+
+  // Begin a new stroke for undo/redo purposes.
+  undoManager.beginStroke('fill');
+
+  // Determine if this is a blank fill versus an active fill.
+  const isBlankFill = currentColor === COLORS.base;
+  let faceAxis = null;
+  let faceValue = null;
+
+  // Determine fill mode:
+  // If Shift is held, we want to fill all visible layers (i.e., layers with y < visibleLayerCount)
+  // Otherwise, restrict the fill to only the horizontal layer (the clicked layer).
+  const fillAcrossVisibleLayers = e.shiftKey;
+  if (isBlankFill) {
+    if (!fillAcrossVisibleLayers) {
+      faceAxis = 'y';
+      faceValue = startY;
+    }
+    // If Shift is held, no per-voxel face constraint is set here.
+  }
+
+  // Set up data structures for flood fill.
+  const queue = [startCoord];
+  const visited = new Set();
+  visited.add(startCoordStr);
+
+  // Offsets for the 6-connected (orthogonal) neighbors.
+  const neighborOffsets = [
+    { dx: 1, dy: 0, dz: 0 },
+    { dx: -1, dy: 0, dz: 0 },
+    { dx: 0, dy: 1, dz: 0 },
+    { dx: 0, dy: -1, dz: 0 },
+    { dx: 0, dy: 0, dz: 1 },
+    { dx: 0, dy: 0, dz: -1 },
+  ];
+
+  // Flood fill loop using BFS.
+  while (queue.length > 0) {
+    const { x, y, z } = queue.shift();
+    const coordStr = `${x},${y},${z}`;
+
+    // Get the color of the current voxel.
+    const voxelColor = voxelData.has(coordStr)
+      ? voxelData.get(coordStr)
+      : COLORS.base;
+    // Skip if the color does not match the target.
+    if (voxelColor !== currentColor) continue;
+
+    // Enforce fill constraints:
+    if (fillAcrossVisibleLayers) {
+      // Only process voxels in layers that are visible (i.e., below the top visible layer).
+      if (y >= visibleLayerCount) continue;
+    } else if (faceAxis) {
+      // Constrain propagation to the clicked horizontal layer.
+      if (faceAxis === 'y' && y !== faceValue) continue;
+    }
+
+    // Update voxel: record change, update voxelData and visuals.
+    undoManager.recordChange(coordStr, voxelColor, newColor);
+    if (newColor === COLORS.base) {
+      voxelData.delete(coordStr);
+    } else {
+      voxelData.set(coordStr, newColor);
+    }
+
+    const dot = dots.find((d) => d.userData.coord === coordStr);
+    if (dot) {
+      if (dot.material === baseMaterial) {
+        dot.material = dot.material.clone();
+      }
+      dot.material.color.set(newColor);
+      dot.scale.set(
+        newColor === COLORS.base ? voxelSize * 0.5 : voxelSize,
+        voxelSize,
+        1
+      );
+    }
+
+    // Process neighboring voxels.
+    for (const { dx, dy, dz } of neighborOffsets) {
+      const nx = x + dx;
+      const ny = y + dy;
+      const nz = z + dz;
+      if (
+        nx < 0 ||
+        nx >= pointsPerAxis ||
+        ny < 0 ||
+        ny >= pointsPerAxis ||
+        nz < 0 ||
+        nz >= pointsPerAxis
+      )
+        continue;
+      const nCoordStr = `${nx},${ny},${nz}`;
+      if (visited.has(nCoordStr)) continue;
+      visited.add(nCoordStr);
+      queue.push({ x: nx, y: ny, z: nz });
+    }
+  }
+
+  // Finalize the fill stroke for undo/redo integration.
+  undoManager.endStroke();
+  updateVoxelVisibility();
 }
 
 function updateLayerVisibility() {
@@ -438,6 +568,13 @@ const keyState = new Set();
 
 document.addEventListener('keydown', (e) => {
   keyState.add(e.key);
+
+  // Toggle fill mode with the F key
+  if (e.key.toLowerCase() === 'f') {
+    fillMode = !fillMode;
+    e.preventDefault();
+    return; // Exit early so no other key actions are taken in this event
+  }
 
   const isShift = e.shiftKey;
 
