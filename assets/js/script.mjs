@@ -372,6 +372,10 @@ function importModel(data) {
     voxelData.set(coord, color);
     const dot = dots.find((d) => d.userData.coord === coord);
     if (dot) {
+      // Clone the material if it's still the shared baseMaterial
+      if (dot.material === baseMaterial) {
+        dot.material = dot.material.clone();
+      }
       dot.material.color.set(color);
       dot.scale.set(voxelSize, voxelSize, 1); // Full size for active voxel
     }
