@@ -445,7 +445,7 @@ async function loadDefaultPalette() {
     const response = await fetch('./assets/data/db32.json');
     const palette = await response.json();
     const paletteSquares = document.querySelectorAll(
-      '#colorPalettePanel .colorSquare'
+      '#colorPalettePanel .colorSwatch'
     );
 
     paletteSquares.forEach((square, index) => {
@@ -459,7 +459,7 @@ async function loadDefaultPalette() {
 
           // Highlight active square
           document
-            .querySelectorAll('#colorPalettePanel .colorSquare')
+            .querySelectorAll('#colorPalettePanel .colorSwatch')
             .forEach((sq) => sq.classList.remove('active'));
           square.classList.add('active');
         });
@@ -643,8 +643,8 @@ document.addEventListener('keyup', (e) => {
   keyState.delete(e.key);
 });
 
-document.getElementById('resetLink').addEventListener('click', resetModel);
-document.getElementById('openLink').addEventListener('click', () => {
+document.getElementById('newFile').addEventListener('click', resetModel);
+document.getElementById('openFile').addEventListener('click', () => {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.json';
@@ -656,7 +656,7 @@ document.getElementById('openLink').addEventListener('click', () => {
   };
   input.click();
 });
-document.getElementById('downloadLink').addEventListener('click', exportModel);
+document.getElementById('saveFile').addEventListener('click', exportModel);
 
 canvas.addEventListener(
   'wheel',

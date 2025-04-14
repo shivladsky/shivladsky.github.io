@@ -24,50 +24,96 @@ canvas {
 #titleOverlay {
   position: fixed;
   bottom: 16px;
-  left: 16px;
+  left: 32px;
   font-size: 64px;
   color: #ededed;
   pointer-events: none;
 }
 
-#topLeftLinks {
+/* Menubar at the top */
+#menuBar {
   position: fixed;
-  top: 16px;
-  left: 16px;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background-color: black;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
   z-index: 10;
 }
 
-#topLeftLinks a {
+/* Each menu item (File, Edit, etc.) */
+.menu-item {
+  position: relative;
+  display: inline-block;
+}
+
+/* Top-level label like "File" */
+.menu-label {
   font-size: 36px;
   color: #ededed;
   text-decoration: none;
   pointer-events: auto;
+  padding: 8px 16px;
+  display: inline-block;
 }
 
-#topLeftLinks a:hover {
-  color: white;
+.menu-label:hover {
+  color: black;
+  background-color: #ededed;
+}
+
+/* Dropdown container */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: black;
+  display: none;
+  flex-direction: column;
+  min-width: 100px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+
+.dropdown.show {
+  display: flex;
+}
+
+/* Each dropdown item */
+.dropdown-item {
+  font-size: 36px;
+  color: #ededed;
+  text-decoration: none;
+  padding: 8px 16px;
+  display: block;
+}
+
+.dropdown-item:hover {
+  color: black;
+  background-color: #ededed;
 }
 
 #colorPalettePanel {
   position: fixed;
-  top: 0;
-  right: 0;
+  top: 64px; /* Matches the menubar height */
+  right: 16px;
   width: 60px;
-  height: 100vh;
-  padding: 8px 4px;
+  height: calc(100vh - 64px);
+  padding: 8px 4px 32px 4px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 20;
   box-sizing: border-box;
 }
 
-.colorSquare {
+.colorSwatch {
   width: 100%;
   aspect-ratio: 1 / 1;
   min-height: 16px;
@@ -78,12 +124,8 @@ canvas {
   background-color: #000; /* placeholder color */
 }
 
-.colorSquare:hover {
-  transform: scale(1.1);
-  border-color: #fff;
-}
-
-.colorSquare.active {
+.colorSwatch:hover,
+.colorSwatch.active {
   transform: scale(1.1);
   border-color: #fff;
 }
