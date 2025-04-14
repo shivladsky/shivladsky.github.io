@@ -6,6 +6,9 @@ body {
   padding: 0;
   height: 100%;
   overflow: hidden;
+  /* Prevent horizontal swipe navigation */
+  overscroll-behavior-x: none;
+  touch-action: none;
 }
 
 canvas {
@@ -13,6 +16,9 @@ canvas {
   width: 100vw;
   height: 100vh;
   background-color: black;
+  /* Also disable overscroll behavior and restrict touch gestures on canvas */
+  overscroll-behavior-x: none;
+  touch-action: none;
 }
 
 #titleOverlay {
