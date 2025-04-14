@@ -51,6 +51,7 @@ scene.add(voxelGroup);
 let visibleLayerCount = 1;
 let xrayMode = false;
 let fillMode = false;
+let overpaintMode = false;
 
 // Create all dots
 const dots = [];
@@ -147,8 +148,8 @@ function tryPaintVoxel(e) {
   // Determine if we're in deletion (erase) mode.
   const isDeleteMode = e && (e.ctrlKey || e.metaKey);
 
-  // If not in deletion mode and the voxel is already painted, do nothing.
-  if (!isDeleteMode && voxelData.has(coord)) return false;
+  const isPaintable = overpaintMode || !voxelData.has(coord);
+  if (!isDeleteMode && !isPaintable) return false;
 
   const oldColor = voxelData.get(coord) || COLORS.base;
   const newColor = isDeleteMode ? COLORS.base : selectedColor;
@@ -574,6 +575,13 @@ document.addEventListener('keydown', (e) => {
     fillMode = !fillMode;
     e.preventDefault();
     return; // Exit early so no other key actions are taken in this event
+  }
+
+  // Toggle overpaint mode with the O key
+  if (e.key.toLowerCase() === 'o') {
+    overpaintMode = !overpaintMode;
+    e.preventDefault();
+    return;
   }
 
   const isShift = e.shiftKey;
