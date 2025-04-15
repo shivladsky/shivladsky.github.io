@@ -581,7 +581,7 @@ document.addEventListener('keydown', (e) => {
   }
 
   // Toggle overpaint mode with the O key
-  if (e.key.toLowerCase() === 'o') {
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'o') {
     overpaintMode = !overpaintMode;
     e.preventDefault();
     return;
@@ -639,6 +639,21 @@ document.addEventListener('keydown', (e) => {
   ) {
     undoManager.undo();
     e.preventDefault();
+  }
+
+  // --- FILE SHORTCUTS ---
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'o') {
+    // Cmd/Ctrl + O → Open File
+    e.preventDefault();
+    document.getElementById('openFile').click();
+    return;
+  }
+
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+    // Cmd/Ctrl + S → Save File
+    e.preventDefault();
+    document.getElementById('saveFile').click();
+    return;
   }
 });
 
