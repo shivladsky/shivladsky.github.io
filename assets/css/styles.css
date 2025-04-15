@@ -21,6 +21,7 @@ canvas {
   touch-action: none;
 }
 
+/* Logo bottom-left */
 #titleOverlay {
   position: fixed;
   bottom: 16px;
