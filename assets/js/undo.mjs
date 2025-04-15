@@ -32,9 +32,18 @@ export class UndoManager {
     if (this.currentStroke?.voxels.length > 0) {
       this.undoStack.push(this.currentStroke);
       this.redoStack = []; // Clear redo history after a new action
+      this.dispatchUndoRedoChanged();
     }
 
     this.currentStroke = null;
+  }
+
+  canUndo() {
+    return this.undoStack.length > 0;
+  }
+
+  canRedo() {
+    return this.redoStack.length > 0;
   }
 
   undo() {
@@ -62,6 +71,7 @@ export class UndoManager {
 
     this.redoStack.push(stroke);
     this.updateVoxelVisibility();
+    this.dispatchUndoRedoChanged();
   }
 
   redo() {
@@ -91,11 +101,20 @@ export class UndoManager {
 
     this.undoStack.push(stroke);
     this.updateVoxelVisibility();
+    this.dispatchUndoRedoChanged();
+  }
+
+  dispatchUndoRedoChanged() {
+    const event = new CustomEvent('undoRedoChanged', {
+      detail: { canUndo: this.canUndo(), canRedo: this.canRedo() },
+    });
+    document.dispatchEvent(event);
   }
 
   clearHistory() {
     this.undoStack = [];
     this.redoStack = [];
     this.currentStroke = null;
+    this.dispatchUndoRedoChanged();
   }
 }

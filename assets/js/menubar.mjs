@@ -54,4 +54,19 @@ document.addEventListener('DOMContentLoaded', () => {
   menuArea.addEventListener('contextmenu', (e) => {
     e.preventDefault(); // Block right-click context menu only in menuBar
   });
+
+  // Get initial state from UndoManager
+  document.addEventListener('undoRedoChanged', (event) => {
+    const { canUndo, canRedo } = event.detail;
+    const undoMenuItem = document.getElementById('undoAction');
+    const redoMenuItem = document.getElementById('redoAction');
+
+    // Enable or disable based on current state
+    if (undoMenuItem) {
+      undoMenuItem.classList.toggle('disabled', !canUndo);
+    }
+    if (redoMenuItem) {
+      redoMenuItem.classList.toggle('disabled', !canRedo);
+    }
+  });
 });

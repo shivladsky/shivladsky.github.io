@@ -98,6 +98,19 @@ canvas {
   background-color: #ededed;
 }
 
+.dropdown-item.disabled {
+  color: #505050;
+  background-color: black;
+  pointer-events: none;
+}
+
+.dropdown-item.disabled:hover {
+  color: #505050;
+  background-color: black;
+  transform: none;
+  border-color: #000;
+}
+
 #colorPalettePanel {
   position: fixed;
   top: 64px; /* Matches the menubar height */

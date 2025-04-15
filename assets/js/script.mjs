@@ -470,7 +470,10 @@ async function loadDefaultPalette() {
   }
 }
 
-window.addEventListener('DOMContentLoaded', loadDefaultPalette);
+window.addEventListener('DOMContentLoaded', () => {
+  loadDefaultPalette();
+  undoManager.dispatchUndoRedoChanged();
+});
 
 function resetModel(e) {
   if (e) e.preventDefault();
@@ -643,6 +646,7 @@ document.addEventListener('keyup', (e) => {
   keyState.delete(e.key);
 });
 
+// --- MENU BAR DROPDOWN ITEM CLICKS ---
 document.getElementById('newFile').addEventListener('click', resetModel);
 document.getElementById('openFile').addEventListener('click', () => {
   const input = document.createElement('input');
@@ -658,6 +662,16 @@ document.getElementById('openFile').addEventListener('click', () => {
 });
 document.getElementById('saveFile').addEventListener('click', exportModel);
 
+document.getElementById('undoAction').addEventListener('click', (e) => {
+  e.preventDefault();
+  undoManager.undo();
+});
+document.getElementById('redoAction').addEventListener('click', (e) => {
+  e.preventDefault();
+  undoManager.redo();
+});
+
+// --- TRACKPAD/TOUCH CONTROLS ---
 canvas.addEventListener(
   'wheel',
   (e) => {
