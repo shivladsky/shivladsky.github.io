@@ -1,67 +1,73 @@
 document.addEventListener('DOMContentLoaded', () => {
   const menuLabels = document.querySelectorAll('.menu-label');
+  let menuActive = false;
 
-  menuLabels.forEach((label) => {
-    const dropdown = label.nextElementSibling;
-
-    label.addEventListener('click', (event) => {
-      event.preventDefault();
-
-      // Close all other dropdowns
-      document.querySelectorAll('.dropdown.show').forEach((openDropdown) => {
-        if (openDropdown !== dropdown) {
-          openDropdown.classList.remove('show');
-        }
-      });
-
-      // Toggle the clicked one
-      dropdown.classList.toggle('show');
-    });
-  });
-
-  // Close dropdowns when clicking outside any menu item
   const closeAllDropdowns = () => {
     document.querySelectorAll('.dropdown.show').forEach((dropdown) => {
       dropdown.classList.remove('show');
     });
+    menuActive = false;
   };
 
-  document.addEventListener('click', (event) => {
-    const isInsideMenu = event.target.closest('.menu-item');
-    if (!isInsideMenu) closeAllDropdowns();
+  menuLabels.forEach((label) => {
+    const dropdown = label.nextElementSibling;
+
+    // Click to open/close and activate menu bar mode
+    label.addEventListener('click', (event) => {
+      event.preventDefault();
+      const isOpen = dropdown.classList.contains('show');
+      closeAllDropdowns();
+
+      if (!isOpen) {
+        dropdown.classList.add('show');
+        menuActive = true;
+      }
+    });
+
+    // Hover over other menu labels if menu is active
+    label.addEventListener('mouseenter', () => {
+      if (menuActive) {
+        closeAllDropdowns();
+        dropdown.classList.add('show');
+        menuActive = true;
+      }
+    });
   });
 
-  // Close dropdowns when clicking any dropdown item
+  // Close dropdowns when clicking outside OR selecting a dropdown item
   document.addEventListener('click', (event) => {
-    if (event.target.classList.contains('dropdown-item')) {
+    const isInsideMenu = event.target.closest('.menu-item');
+    const isDropdownItem = event.target.classList.contains('dropdown-item');
+    if (!isInsideMenu || isDropdownItem) {
       closeAllDropdowns();
     }
   });
 
-  // Also close on right-click outside
+  // Right-click outside the menu closes it
   document.addEventListener('contextmenu', (event) => {
     const isInsideMenu = event.target.closest('.menu-item');
     if (!isInsideMenu) closeAllDropdowns();
   });
 
-  // And when the window/tab loses focus
+  // Window blur closes dropdowns
   window.addEventListener('blur', () => {
     closeAllDropdowns();
   });
 
-  // Disable right-click on menu bar and dropdowns
+  // Prevent default right-click on the menu bar itself
   const menuArea = document.getElementById('menuBar');
-  menuArea.addEventListener('contextmenu', (e) => {
-    e.preventDefault(); // Block right-click context menu only in menuBar
-  });
+  if (menuArea) {
+    menuArea.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+  }
 
-  // Get initial state from UndoManager
+  // Handle UndoManager state updates
   document.addEventListener('undoRedoChanged', (event) => {
     const { canUndo, canRedo } = event.detail;
     const undoMenuItem = document.getElementById('undoAction');
     const redoMenuItem = document.getElementById('redoAction');
 
-    // Enable or disable based on current state
     if (undoMenuItem) {
       undoMenuItem.classList.toggle('disabled', !canUndo);
     }
