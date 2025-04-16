@@ -625,103 +625,11 @@ async function exportModel() {
   }
 }
 
-// --- Export global controls ---
-window.Volumetrik = {
-  resetModel,
-  importModel,
-  exportModel,
-  handleUndo,
-  handleRedo,
-  increaseVisibleLayers,
-  decreaseVisibleLayers,
-  jumpToTopLayer,
-  jumpToBottomLayer,
-  toggleXrayMode,
-  toggleGridVisibility,
-  toggleOverpaintMode,
-  toggleFillMode,
-};
-
 // Bind events
 canvas.addEventListener('mousedown', onMouseDown);
 canvas.addEventListener('mousemove', onMouseMove);
 canvas.addEventListener('mouseup', onMouseUp);
 canvas.addEventListener('mouseleave', onMouseUp);
-
-const keyState = new Set();
-
-document.addEventListener('keydown', (e) => {
-  keyState.add(e.key);
-
-  const isCmdOrCtrl = e.metaKey || e.ctrlKey;
-  const key = e.key.toLowerCase();
-  const isShift = e.shiftKey;
-
-  // --- TOGGLE MODES ---
-  if (key === 'f') {
-    toggleFillMode();
-    e.preventDefault();
-    return;
-  }
-
-  if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'o') {
-    toggleOverpaintMode();
-    e.preventDefault();
-    return;
-  }
-
-  // --- LAYER CONTROLS ---
-  if (isShift && key === 'q') {
-    jumpToBottomLayer();
-    e.preventDefault();
-  } else if (isShift && key === 'e') {
-    jumpToTopLayer();
-    e.preventDefault();
-  } else if (!isShift && key === 'q') {
-    decreaseVisibleLayers();
-    e.preventDefault();
-  } else if (!isShift && key === 'e') {
-    increaseVisibleLayers();
-    e.preventDefault();
-  }
-
-  // --- XRAY & GRID ---
-  else if (key === 'r') {
-    toggleXrayMode();
-    e.preventDefault();
-  } else if (key === 'tab') {
-    toggleGridVisibility();
-    e.preventDefault();
-  }
-
-  // --- UNDO / REDO ---
-  else if (
-    (e.metaKey && e.shiftKey && key === 'z') || // Cmd+Shift+Z → Redo (Mac)
-    (e.ctrlKey && key === 'y') // Ctrl+Y → Redo (Win)
-  ) {
-    handleRedo();
-    e.preventDefault();
-  } else if (
-    (e.metaKey && key === 'z') || // Cmd+Z → Undo (Mac)
-    (e.ctrlKey && key === 'z') // Ctrl+Z → Undo (Win)
-  ) {
-    handleUndo();
-    e.preventDefault();
-  }
-
-  // --- FILE SHORTCUTS ---
-  else if (isCmdOrCtrl && key === 'o') {
-    e.preventDefault();
-    importModel();
-  } else if (isCmdOrCtrl && key === 's') {
-    e.preventDefault();
-    exportModel();
-  }
-});
-
-document.addEventListener('keyup', (e) => {
-  keyState.delete(e.key);
-});
 
 // --- TRACKPAD/TOUCH CONTROLS ---
 canvas.addEventListener(
@@ -740,5 +648,22 @@ canvas.addEventListener(
   },
   { passive: false } // Needed for preventDefault() to work
 );
+
+// --- Export global controls ---
+window.Volumetrik = {
+  resetModel,
+  importModel,
+  exportModel,
+  handleUndo,
+  handleRedo,
+  increaseVisibleLayers,
+  decreaseVisibleLayers,
+  jumpToTopLayer,
+  jumpToBottomLayer,
+  toggleXrayMode,
+  toggleGridVisibility,
+  toggleOverpaintMode,
+  toggleFillMode,
+};
 
 animate();
