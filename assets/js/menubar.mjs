@@ -104,6 +104,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Handle layer state updates
+  document.addEventListener('visibleLayerChanged', (event) => {
+    const { canGoDown, canGoUp } = event.detail;
+
+    document
+      .getElementById('upOneLayer')
+      .classList.toggle('disabled', !canGoUp);
+    document.getElementById('jumpToTop').classList.toggle('disabled', !canGoUp);
+
+    document
+      .getElementById('downOneLayer')
+      .classList.toggle('disabled', !canGoDown);
+    document
+      .getElementById('jumpToBottom')
+      .classList.toggle('disabled', !canGoDown);
+  });
+
   // --- FILE MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('newFile').addEventListener('click', (e) => {
     e.preventDefault();

@@ -301,6 +301,16 @@ function fillAtVoxel(e) {
   updateVoxelVisibility();
 }
 
+function dispatchVisibleLayerChanged() {
+  const canGoDown = visibleLayerCount > 1;
+  const canGoUp = visibleLayerCount < pointsPerAxis;
+
+  const event = new CustomEvent('visibleLayerChanged', {
+    detail: { canGoDown, canGoUp },
+  });
+  document.dispatchEvent(event);
+}
+
 function updateLayerVisibility() {
   updateVoxelVisibility();
 }
@@ -473,6 +483,7 @@ async function loadDefaultPalette() {
 window.addEventListener('DOMContentLoaded', () => {
   loadDefaultPalette();
   undoManager.dispatchUndoRedoChanged();
+  dispatchVisibleLayerChanged();
 });
 
 // --- Control Functions ---
@@ -488,6 +499,7 @@ function increaseVisibleLayers() {
   if (visibleLayerCount < pointsPerAxis) {
     visibleLayerCount++;
     updateLayerVisibility();
+    dispatchVisibleLayerChanged();
   }
 }
 
@@ -495,17 +507,20 @@ function decreaseVisibleLayers() {
   if (visibleLayerCount > 1) {
     visibleLayerCount--;
     updateLayerVisibility();
+    dispatchVisibleLayerChanged();
   }
 }
 
 function jumpToTopLayer() {
   visibleLayerCount = pointsPerAxis;
   updateLayerVisibility();
+  dispatchVisibleLayerChanged();
 }
 
 function jumpToBottomLayer() {
   visibleLayerCount = 1;
   updateLayerVisibility();
+  dispatchVisibleLayerChanged();
 }
 
 function toggleXrayMode() {
