@@ -526,7 +526,22 @@ function resetModel(e) {
   updateVoxelVisibility();
 }
 
-function importModel(data) {
+function importModel(e) {
+  if (e) e.preventDefault();
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => loadModel(JSON.parse(reader.result));
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function loadModel(data) {
   voxelData.clear();
 
   // Reset every dot to blank state
@@ -682,18 +697,7 @@ document.addEventListener('keyup', (e) => {
 
 // --- MENU BAR DROPDOWN ITEM CLICKS ---
 document.getElementById('newFile').addEventListener('click', resetModel);
-document.getElementById('openFile').addEventListener('click', () => {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => importModel(JSON.parse(reader.result));
-    reader.readAsText(file);
-  };
-  input.click();
-});
+document.getElementById('openFile').addEventListener('click', importModel);
 document.getElementById('saveFile').addEventListener('click', exportModel);
 
 document.getElementById('undoAction').addEventListener('click', (e) => {
