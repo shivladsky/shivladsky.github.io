@@ -92,6 +92,41 @@ let dragButton = null;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 
+// Reusable view control functions
+function increaseVisibleLayers() {
+  if (visibleLayerCount < pointsPerAxis) {
+    visibleLayerCount++;
+    updateLayerVisibility();
+  }
+}
+
+function decreaseVisibleLayers() {
+  if (visibleLayerCount > 1) {
+    visibleLayerCount--;
+    updateLayerVisibility();
+  }
+}
+
+function jumpToTopLayer() {
+  visibleLayerCount = pointsPerAxis;
+  updateLayerVisibility();
+}
+
+function jumpToBottomLayer() {
+  visibleLayerCount = 1;
+  updateLayerVisibility();
+}
+
+function toggleXrayMode() {
+  xrayMode = !xrayMode;
+  updateVoxelVisibility();
+}
+
+function toggleGridVisibility() {
+  showEmptyVoxels = !showEmptyVoxels;
+  updateVoxelVisibility();
+}
+
 function onMouseDown(e) {
   if (e.button === 2) {
     // Right-click for rotation
@@ -591,38 +626,22 @@ document.addEventListener('keydown', (e) => {
 
   // --- PAINTING CONTROLS ---
   if (isShift && e.key.toLowerCase() === 'q') {
-    // Shift + Q → show only bottom layer
-    visibleLayerCount = 1;
-    updateLayerVisibility();
+    jumpToBottomLayer();
     e.preventDefault();
   } else if (isShift && e.key.toLowerCase() === 'e') {
-    // Shift + E → show all layers
-    visibleLayerCount = pointsPerAxis;
-    updateLayerVisibility();
+    jumpToTopLayer();
     e.preventDefault();
   } else if (!isShift && e.key.toLowerCase() === 'q') {
-    // Q → hide one layer
-    if (visibleLayerCount > 1) {
-      visibleLayerCount--;
-      updateLayerVisibility();
-    }
+    decreaseVisibleLayers();
     e.preventDefault();
   } else if (!isShift && e.key.toLowerCase() === 'e') {
-    // E → show one more layer
-    if (visibleLayerCount < pointsPerAxis) {
-      visibleLayerCount++;
-      updateLayerVisibility();
-    }
+    increaseVisibleLayers();
     e.preventDefault();
   } else if (e.key.toLowerCase() === 'r') {
-    // R → toggle xray
-    xrayMode = !xrayMode;
-    updateVoxelVisibility();
+    toggleXrayMode();
     e.preventDefault();
   } else if (e.key === 'Tab') {
-    // Tab → toggle empty voxel visibility
-    showEmptyVoxels = !showEmptyVoxels;
-    updateVoxelVisibility();
+    toggleGridVisibility();
     e.preventDefault();
   }
 
@@ -689,42 +708,32 @@ document.getElementById('redoAction').addEventListener('click', (e) => {
 // --- VIEW MENU DROPDOWN ITEM CLICKS ---
 document.getElementById('upOneLayer').addEventListener('click', (e) => {
   e.preventDefault();
-  if (visibleLayerCount < pointsPerAxis) {
-    visibleLayerCount++;
-    updateLayerVisibility();
-  }
+  increaseVisibleLayers();
 });
 
 document.getElementById('downOneLayer').addEventListener('click', (e) => {
   e.preventDefault();
-  if (visibleLayerCount > 1) {
-    visibleLayerCount--;
-    updateLayerVisibility();
-  }
+  decreaseVisibleLayers();
 });
 
 document.getElementById('jumpToTop').addEventListener('click', (e) => {
   e.preventDefault();
-  visibleLayerCount = pointsPerAxis;
-  updateLayerVisibility();
+  jumpToTopLayer();
 });
 
 document.getElementById('jumpToBottom').addEventListener('click', (e) => {
   e.preventDefault();
-  visibleLayerCount = 1;
-  updateLayerVisibility();
+  jumpToBottomLayer();
 });
 
 document.getElementById('toggleXray').addEventListener('click', (e) => {
   e.preventDefault();
-  xrayMode = !xrayMode;
-  updateVoxelVisibility();
+  toggleXrayMode();
 });
 
 document.getElementById('toggleGrid').addEventListener('click', (e) => {
   e.preventDefault();
-  showEmptyVoxels = !showEmptyVoxels;
-  updateVoxelVisibility();
+  toggleGridVisibility();
 });
 
 // --- TRACKPAD/TOUCH CONTROLS ---
