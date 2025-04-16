@@ -510,9 +510,7 @@ window.addEventListener('DOMContentLoaded', () => {
   undoManager.dispatchUndoRedoChanged();
 });
 
-function resetModel(e) {
-  if (e) e.preventDefault();
-
+function resetModel() {
   voxelData.clear();
 
   for (const dot of dots) {
@@ -526,9 +524,7 @@ function resetModel(e) {
   updateVoxelVisibility();
 }
 
-function importModel(e) {
-  if (e) e.preventDefault();
-
+function importModel() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.json';
@@ -696,9 +692,20 @@ document.addEventListener('keyup', (e) => {
 });
 
 // --- FILE MENU DROPDOWN ITEM CLICKS ---
-document.getElementById('newFile').addEventListener('click', resetModel);
-document.getElementById('openFile').addEventListener('click', importModel);
-document.getElementById('saveFile').addEventListener('click', exportModel);
+document.getElementById('newFile').addEventListener('click', (e) => {
+  e.preventDefault();
+  resetModel();
+});
+
+document.getElementById('openFile').addEventListener('click', (e) => {
+  e.preventDefault();
+  importModel();
+});
+
+document.getElementById('saveFile').addEventListener('click', (e) => {
+  e.preventDefault();
+  exportModel();
+});
 
 // --- EDIT MENU DROPDOWN ITEM CLICKS ---
 document.getElementById('undoAction').addEventListener('click', (e) => {
