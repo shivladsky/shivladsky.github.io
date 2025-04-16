@@ -301,16 +301,6 @@ function fillAtVoxel(e) {
   updateVoxelVisibility();
 }
 
-function dispatchVisibleLayerChanged() {
-  const canGoDown = visibleLayerCount > 1;
-  const canGoUp = visibleLayerCount < pointsPerAxis;
-
-  const event = new CustomEvent('visibleLayerChanged', {
-    detail: { canGoDown, canGoUp },
-  });
-  document.dispatchEvent(event);
-}
-
 function updateLayerVisibility() {
   updateVoxelVisibility();
 }
@@ -480,10 +470,29 @@ async function loadDefaultPalette() {
   }
 }
 
+function dispatchVisibleLayerChanged() {
+  const canGoDown = visibleLayerCount > 1;
+  const canGoUp = visibleLayerCount < pointsPerAxis;
+
+  const event = new CustomEvent('visibleLayerChanged', {
+    detail: { canGoDown, canGoUp },
+  });
+  document.dispatchEvent(event);
+}
+
+function dispatchModeChanged(mode, value) {
+  document.dispatchEvent(
+    new CustomEvent('modeChanged', {
+      detail: { mode, value },
+    })
+  );
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   loadDefaultPalette();
   undoManager.dispatchUndoRedoChanged();
   dispatchVisibleLayerChanged();
+  dispatchModeChanged('grid', showEmptyVoxels);
 });
 
 // --- Control Functions ---
@@ -526,19 +535,23 @@ function jumpToBottomLayer() {
 function toggleXrayMode() {
   xrayMode = !xrayMode;
   updateVoxelVisibility();
+  dispatchModeChanged('xray', xrayMode);
 }
 
 function toggleGridVisibility() {
   showEmptyVoxels = !showEmptyVoxels;
   updateVoxelVisibility();
+  dispatchModeChanged('grid', showEmptyVoxels);
 }
 
 function toggleOverpaintMode() {
   overpaintMode = !overpaintMode;
+  dispatchModeChanged('overpaint', overpaintMode);
 }
 
 function toggleFillMode() {
   fillMode = !fillMode;
+  dispatchModeChanged('fill', fillMode);
 }
 
 // --- Model Import/Export ---

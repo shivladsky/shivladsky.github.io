@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ensure dropdown is wide enough for its longest item
     if (dropdown && dropdown.classList.contains('dropdown')) {
+      // Check if any items are .checked
+      const hasChecks = !!dropdown.querySelector('.dropdown-item.checked');
+      dropdown.classList.toggle('with-checks', hasChecks);
+
       // Temporarily reveal dropdown for measurement
       const originalDisplay = dropdown.style.display;
       const originalVisibility = dropdown.style.visibility;
@@ -119,6 +123,43 @@ document.addEventListener('DOMContentLoaded', () => {
     document
       .getElementById('jumpToBottom')
       .classList.toggle('disabled', !canGoDown);
+  });
+
+  // Handle mode changes (xray, grid, overpaint, fill)
+  document.addEventListener('modeChanged', (event) => {
+    const { mode, value } = event.detail;
+
+    const modeToElementId = {
+      xray: 'toggleXray',
+      grid: 'toggleGrid',
+      overpaint: 'toggleOverpaint',
+      fill: 'toggleFill',
+    };
+
+    const elementId = modeToElementId[mode];
+    if (!elementId) return;
+
+    const menuItem = document.getElementById(elementId);
+    if (!menuItem) return;
+
+    menuItem.classList.toggle('checked', value);
+
+    const dropdown = menuItem.closest('.dropdown');
+    if (!dropdown) return;
+
+    const anyChecked = dropdown.querySelector('.dropdown-item.checked');
+    dropdown.classList.toggle('with-checks', !!anyChecked);
+
+    // Recalculate dropdown minWidth if checkmark state has changed
+    const dropdownItems = Array.from(
+      dropdown.querySelectorAll('.dropdown-item')
+    );
+    let maxWidth = 0;
+    dropdownItems.forEach((item) => {
+      item.style.minWidth = 'auto'; // reset before measuring
+      maxWidth = Math.max(maxWidth, item.offsetWidth);
+    });
+    dropdown.style.minWidth = `${maxWidth + (anyChecked ? 32 : 0)}px`;
   });
 
   // --- FILE MENU DROPDOWN ITEM CLICKS ---

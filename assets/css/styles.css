@@ -112,6 +112,40 @@ canvas {
   border-color: #000;
 }
 
+.checkmark {
+  display: inline-block;
+  width: 1.5em;
+  text-align: center;
+  color: #ededed;
+  visibility: hidden; /* hidden by default */
+}
+
+.dropdown-item.checked .checkmark {
+  visibility: visible;
+}
+
+.dropdown.with-checks .dropdown-item {
+  padding-left: 28px;
+  position: relative;
+}
+
+/* Dynamically injected checkmark span */
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  width: 20px;
+  text-align: center;
+  color: currentColor;
+  visibility: hidden;
+}
+
+/* Only visible when checked */
+.dropdown-item.checked::before {
+  content: '·';
+  visibility: visible;
+}
+
 #colorPalettePanel {
   position: fixed;
   top: 64px; /* Matches the menubar height */
