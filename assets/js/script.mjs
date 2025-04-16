@@ -10,7 +10,7 @@ const COLORS = {
 
 let selectedColor = COLORS.active; // Default to green
 
-// VOLUMETRIK-01 Starter - 16x16x16cm cube with 10mm points
+// VoxPaint Starter - 16x16x16cm cube with 10mm points
 const canvas = document.getElementById('viewportCanvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -665,7 +665,7 @@ canvas.addEventListener(
 );
 
 // --- Export global controls ---
-window.Volumetrik = {
+window.VoxPaint = {
   resetModel,
   importModel,
   exportModel,

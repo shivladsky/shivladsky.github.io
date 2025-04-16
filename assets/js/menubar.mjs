@@ -124,68 +124,68 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- FILE MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('newFile').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.resetModel();
+    window.VoxPaint.resetModel();
   });
 
   document.getElementById('openFile').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.importModel();
+    window.VoxPaint.importModel();
   });
 
   document.getElementById('saveFile').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.exportModel();
+    window.VoxPaint.exportModel();
   });
 
   // --- EDIT MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('undoAction').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.handleUndo();
+    window.VoxPaint.handleUndo();
   });
   document.getElementById('redoAction').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.handleRedo();
+    window.VoxPaint.handleRedo();
   });
 
   // --- VIEW MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('upOneLayer').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.increaseVisibleLayers();
+    window.VoxPaint.increaseVisibleLayers();
   });
 
   document.getElementById('downOneLayer').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.decreaseVisibleLayers();
+    window.VoxPaint.decreaseVisibleLayers();
   });
 
   document.getElementById('jumpToTop').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.jumpToTopLayer();
+    window.VoxPaint.jumpToTopLayer();
   });
 
   document.getElementById('jumpToBottom').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.jumpToBottomLayer();
+    window.VoxPaint.jumpToBottomLayer();
   });
 
   document.getElementById('toggleXray').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.toggleXrayMode();
+    window.VoxPaint.toggleXrayMode();
   });
 
   document.getElementById('toggleGrid').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.toggleGridVisibility();
+    window.VoxPaint.toggleGridVisibility();
   });
 
   // --- TOOLS MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('toggleOverpaint').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.toggleOverpaintMode();
+    window.VoxPaint.toggleOverpaintMode();
   });
 
   document.getElementById('toggleFill').addEventListener('click', (e) => {
     e.preventDefault();
-    window.Volumetrik.toggleFillMode();
+    window.VoxPaint.toggleFillMode();
   });
 });
