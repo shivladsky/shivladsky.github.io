@@ -91,6 +91,7 @@ canvas {
   text-decoration: none;
   padding: 8px 16px;
   display: block;
+  white-space: nowrap;
 }
 
 .dropdown-item:hover {

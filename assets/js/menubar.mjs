@@ -12,6 +12,34 @@ document.addEventListener('DOMContentLoaded', () => {
   menuLabels.forEach((label) => {
     const dropdown = label.nextElementSibling;
 
+    // Ensure dropdown is wide enough for its longest item
+    if (dropdown && dropdown.classList.contains('dropdown')) {
+      // Temporarily reveal dropdown for measurement
+      const originalDisplay = dropdown.style.display;
+      const originalVisibility = dropdown.style.visibility;
+      const originalPosition = dropdown.style.position;
+      const originalLeft = dropdown.style.left;
+
+      dropdown.style.visibility = 'hidden';
+      dropdown.style.display = 'block';
+      dropdown.style.position = 'absolute';
+      dropdown.style.left = '-9999px';
+
+      let maxWidth = 0;
+      dropdown.querySelectorAll('.dropdown-item').forEach((item) => {
+        maxWidth = Math.max(maxWidth, item.offsetWidth);
+      });
+
+      // Reset to original styles
+      dropdown.style.display = originalDisplay;
+      dropdown.style.visibility = originalVisibility;
+      dropdown.style.position = originalPosition;
+      dropdown.style.left = originalLeft;
+
+      // Apply computed width
+      dropdown.style.minWidth = `${maxWidth + 32}px`;
+    }
+
     // Click to open/close and activate menu bar mode
     label.addEventListener('click', (event) => {
       event.preventDefault();

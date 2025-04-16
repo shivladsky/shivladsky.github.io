@@ -686,6 +686,47 @@ document.getElementById('redoAction').addEventListener('click', (e) => {
   undoManager.redo();
 });
 
+// --- VIEW MENU DROPDOWN ITEM CLICKS ---
+document.getElementById('upOneLayer').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (visibleLayerCount < pointsPerAxis) {
+    visibleLayerCount++;
+    updateLayerVisibility();
+  }
+});
+
+document.getElementById('downOneLayer').addEventListener('click', (e) => {
+  e.preventDefault();
+  if (visibleLayerCount > 1) {
+    visibleLayerCount--;
+    updateLayerVisibility();
+  }
+});
+
+document.getElementById('jumpToTop').addEventListener('click', (e) => {
+  e.preventDefault();
+  visibleLayerCount = pointsPerAxis;
+  updateLayerVisibility();
+});
+
+document.getElementById('jumpToBottom').addEventListener('click', (e) => {
+  e.preventDefault();
+  visibleLayerCount = 1;
+  updateLayerVisibility();
+});
+
+document.getElementById('toggleXray').addEventListener('click', (e) => {
+  e.preventDefault();
+  xrayMode = !xrayMode;
+  updateVoxelVisibility();
+});
+
+document.getElementById('toggleGrid').addEventListener('click', (e) => {
+  e.preventDefault();
+  showEmptyVoxels = !showEmptyVoxels;
+  updateVoxelVisibility();
+});
+
 // --- TRACKPAD/TOUCH CONTROLS ---
 canvas.addEventListener(
   'wheel',
