@@ -695,11 +695,12 @@ document.addEventListener('keyup', (e) => {
   keyState.delete(e.key);
 });
 
-// --- MENU BAR DROPDOWN ITEM CLICKS ---
+// --- FILE MENU DROPDOWN ITEM CLICKS ---
 document.getElementById('newFile').addEventListener('click', resetModel);
 document.getElementById('openFile').addEventListener('click', importModel);
 document.getElementById('saveFile').addEventListener('click', exportModel);
 
+// --- EDIT MENU DROPDOWN ITEM CLICKS ---
 document.getElementById('undoAction').addEventListener('click', (e) => {
   e.preventDefault();
   undoManager.undo();
@@ -738,6 +739,17 @@ document.getElementById('toggleXray').addEventListener('click', (e) => {
 document.getElementById('toggleGrid').addEventListener('click', (e) => {
   e.preventDefault();
   toggleGridVisibility();
+});
+
+// --- TOOLS MENU DROPDOWN ITEM CLICKS ---
+document.getElementById('toggleOverpaint').addEventListener('click', (e) => {
+  e.preventDefault();
+  overpaintMode = !overpaintMode;
+});
+
+document.getElementById('toggleFill').addEventListener('click', (e) => {
+  e.preventDefault();
+  fillMode = !fillMode;
 });
 
 // --- TRACKPAD/TOUCH CONTROLS ---
