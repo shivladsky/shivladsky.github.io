@@ -92,7 +92,15 @@ let dragButton = null;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 
-// Reusable view control functions
+// Reusable control functions
+function handleUndo() {
+  undoManager.undo();
+}
+
+function handleRedo() {
+  undoManager.redo();
+}
+
 function increaseVisibleLayers() {
   if (visibleLayerCount < pointsPerAxis) {
     visibleLayerCount++;
@@ -125,6 +133,14 @@ function toggleXrayMode() {
 function toggleGridVisibility() {
   showEmptyVoxels = !showEmptyVoxels;
   updateVoxelVisibility();
+}
+
+function toggleOverpaintMode() {
+  overpaintMode = !overpaintMode;
+}
+
+function toggleFillMode() {
+  fillMode = !fillMode;
 }
 
 function onMouseDown(e) {
@@ -619,71 +635,69 @@ const keyState = new Set();
 document.addEventListener('keydown', (e) => {
   keyState.add(e.key);
 
-  // Toggle fill mode with the F key
-  if (e.key.toLowerCase() === 'f') {
-    fillMode = !fillMode;
-    e.preventDefault();
-    return; // Exit early so no other key actions are taken in this event
-  }
+  const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+  const key = e.key.toLowerCase();
+  const isShift = e.shiftKey;
 
-  // Toggle overpaint mode with the O key
-  if (!e.ctrlKey && !e.metaKey && !e.altKey && e.key.toLowerCase() === 'o') {
-    overpaintMode = !overpaintMode;
+  // --- TOGGLE MODES ---
+  if (key === 'f') {
+    toggleFillMode();
     e.preventDefault();
     return;
   }
 
-  const isShift = e.shiftKey;
+  if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'o') {
+    toggleOverpaintMode();
+    e.preventDefault();
+    return;
+  }
 
-  // --- PAINTING CONTROLS ---
-  if (isShift && e.key.toLowerCase() === 'q') {
+  // --- LAYER CONTROLS ---
+  if (isShift && key === 'q') {
     jumpToBottomLayer();
     e.preventDefault();
-  } else if (isShift && e.key.toLowerCase() === 'e') {
+  } else if (isShift && key === 'e') {
     jumpToTopLayer();
     e.preventDefault();
-  } else if (!isShift && e.key.toLowerCase() === 'q') {
+  } else if (!isShift && key === 'q') {
     decreaseVisibleLayers();
     e.preventDefault();
-  } else if (!isShift && e.key.toLowerCase() === 'e') {
+  } else if (!isShift && key === 'e') {
     increaseVisibleLayers();
     e.preventDefault();
-  } else if (e.key.toLowerCase() === 'r') {
+  }
+
+  // --- XRAY & GRID ---
+  else if (key === 'r') {
     toggleXrayMode();
     e.preventDefault();
-  } else if (e.key === 'Tab') {
+  } else if (key === 'tab') {
     toggleGridVisibility();
     e.preventDefault();
   }
 
   // --- UNDO / REDO ---
   else if (
-    (e.metaKey && e.shiftKey && e.key.toLowerCase() === 'z') || // Cmd+Shift+Z → Redo (Mac)
-    (e.ctrlKey && e.key.toLowerCase() === 'y') // Ctrl+Y → Redo (Win)
+    (e.metaKey && e.shiftKey && key === 'z') || // Cmd+Shift+Z → Redo (Mac)
+    (e.ctrlKey && key === 'y') // Ctrl+Y → Redo (Win)
   ) {
-    undoManager.redo();
+    handleRedo();
     e.preventDefault();
   } else if (
-    (e.metaKey && e.key.toLowerCase() === 'z') || // Cmd+Z → Undo (Mac)
-    (e.ctrlKey && e.key.toLowerCase() === 'z') // Ctrl+Z → Undo (Win)
+    (e.metaKey && key === 'z') || // Cmd+Z → Undo (Mac)
+    (e.ctrlKey && key === 'z') // Ctrl+Z → Undo (Win)
   ) {
-    undoManager.undo();
+    handleUndo();
     e.preventDefault();
   }
 
   // --- FILE SHORTCUTS ---
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'o') {
-    // Cmd/Ctrl + O → Open File
+  else if (isCmdOrCtrl && key === 'o') {
     e.preventDefault();
-    document.getElementById('openFile').click();
-    return;
-  }
-
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
-    // Cmd/Ctrl + S → Save File
+    importModel();
+  } else if (isCmdOrCtrl && key === 's') {
     e.preventDefault();
-    document.getElementById('saveFile').click();
-    return;
+    exportModel();
   }
 });
 
@@ -710,11 +724,11 @@ document.getElementById('saveFile').addEventListener('click', (e) => {
 // --- EDIT MENU DROPDOWN ITEM CLICKS ---
 document.getElementById('undoAction').addEventListener('click', (e) => {
   e.preventDefault();
-  undoManager.undo();
+  handleUndo();
 });
 document.getElementById('redoAction').addEventListener('click', (e) => {
   e.preventDefault();
-  undoManager.redo();
+  handleRedo();
 });
 
 // --- VIEW MENU DROPDOWN ITEM CLICKS ---
@@ -751,12 +765,12 @@ document.getElementById('toggleGrid').addEventListener('click', (e) => {
 // --- TOOLS MENU DROPDOWN ITEM CLICKS ---
 document.getElementById('toggleOverpaint').addEventListener('click', (e) => {
   e.preventDefault();
-  overpaintMode = !overpaintMode;
+  toggleOverpaintMode();
 });
 
 document.getElementById('toggleFill').addEventListener('click', (e) => {
   e.preventDefault();
-  fillMode = !fillMode;
+  toggleFillMode();
 });
 
 // --- TRACKPAD/TOUCH CONTROLS ---
