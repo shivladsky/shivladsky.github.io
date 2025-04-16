@@ -92,57 +92,6 @@ let dragButton = null;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 
-// Reusable control functions
-function handleUndo() {
-  undoManager.undo();
-}
-
-function handleRedo() {
-  undoManager.redo();
-}
-
-function increaseVisibleLayers() {
-  if (visibleLayerCount < pointsPerAxis) {
-    visibleLayerCount++;
-    updateLayerVisibility();
-  }
-}
-
-function decreaseVisibleLayers() {
-  if (visibleLayerCount > 1) {
-    visibleLayerCount--;
-    updateLayerVisibility();
-  }
-}
-
-function jumpToTopLayer() {
-  visibleLayerCount = pointsPerAxis;
-  updateLayerVisibility();
-}
-
-function jumpToBottomLayer() {
-  visibleLayerCount = 1;
-  updateLayerVisibility();
-}
-
-function toggleXrayMode() {
-  xrayMode = !xrayMode;
-  updateVoxelVisibility();
-}
-
-function toggleGridVisibility() {
-  showEmptyVoxels = !showEmptyVoxels;
-  updateVoxelVisibility();
-}
-
-function toggleOverpaintMode() {
-  overpaintMode = !overpaintMode;
-}
-
-function toggleFillMode() {
-  fillMode = !fillMode;
-}
-
 function onMouseDown(e) {
   if (e.button === 2) {
     // Right-click for rotation
@@ -526,6 +475,58 @@ window.addEventListener('DOMContentLoaded', () => {
   undoManager.dispatchUndoRedoChanged();
 });
 
+// --- Control Functions ---
+function handleUndo() {
+  undoManager.undo();
+}
+
+function handleRedo() {
+  undoManager.redo();
+}
+
+function increaseVisibleLayers() {
+  if (visibleLayerCount < pointsPerAxis) {
+    visibleLayerCount++;
+    updateLayerVisibility();
+  }
+}
+
+function decreaseVisibleLayers() {
+  if (visibleLayerCount > 1) {
+    visibleLayerCount--;
+    updateLayerVisibility();
+  }
+}
+
+function jumpToTopLayer() {
+  visibleLayerCount = pointsPerAxis;
+  updateLayerVisibility();
+}
+
+function jumpToBottomLayer() {
+  visibleLayerCount = 1;
+  updateLayerVisibility();
+}
+
+function toggleXrayMode() {
+  xrayMode = !xrayMode;
+  updateVoxelVisibility();
+}
+
+function toggleGridVisibility() {
+  showEmptyVoxels = !showEmptyVoxels;
+  updateVoxelVisibility();
+}
+
+function toggleOverpaintMode() {
+  overpaintMode = !overpaintMode;
+}
+
+function toggleFillMode() {
+  fillMode = !fillMode;
+}
+
+// --- Model Import/Export ---
 function resetModel() {
   voxelData.clear();
 
@@ -624,6 +625,23 @@ async function exportModel() {
   }
 }
 
+// --- Export global controls ---
+window.Volumetrik = {
+  resetModel,
+  importModel,
+  exportModel,
+  handleUndo,
+  handleRedo,
+  increaseVisibleLayers,
+  decreaseVisibleLayers,
+  jumpToTopLayer,
+  jumpToBottomLayer,
+  toggleXrayMode,
+  toggleGridVisibility,
+  toggleOverpaintMode,
+  toggleFillMode,
+};
+
 // Bind events
 canvas.addEventListener('mousedown', onMouseDown);
 canvas.addEventListener('mousemove', onMouseMove);
@@ -703,74 +721,6 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('keyup', (e) => {
   keyState.delete(e.key);
-});
-
-// --- FILE MENU DROPDOWN ITEM CLICKS ---
-document.getElementById('newFile').addEventListener('click', (e) => {
-  e.preventDefault();
-  resetModel();
-});
-
-document.getElementById('openFile').addEventListener('click', (e) => {
-  e.preventDefault();
-  importModel();
-});
-
-document.getElementById('saveFile').addEventListener('click', (e) => {
-  e.preventDefault();
-  exportModel();
-});
-
-// --- EDIT MENU DROPDOWN ITEM CLICKS ---
-document.getElementById('undoAction').addEventListener('click', (e) => {
-  e.preventDefault();
-  handleUndo();
-});
-document.getElementById('redoAction').addEventListener('click', (e) => {
-  e.preventDefault();
-  handleRedo();
-});
-
-// --- VIEW MENU DROPDOWN ITEM CLICKS ---
-document.getElementById('upOneLayer').addEventListener('click', (e) => {
-  e.preventDefault();
-  increaseVisibleLayers();
-});
-
-document.getElementById('downOneLayer').addEventListener('click', (e) => {
-  e.preventDefault();
-  decreaseVisibleLayers();
-});
-
-document.getElementById('jumpToTop').addEventListener('click', (e) => {
-  e.preventDefault();
-  jumpToTopLayer();
-});
-
-document.getElementById('jumpToBottom').addEventListener('click', (e) => {
-  e.preventDefault();
-  jumpToBottomLayer();
-});
-
-document.getElementById('toggleXray').addEventListener('click', (e) => {
-  e.preventDefault();
-  toggleXrayMode();
-});
-
-document.getElementById('toggleGrid').addEventListener('click', (e) => {
-  e.preventDefault();
-  toggleGridVisibility();
-});
-
-// --- TOOLS MENU DROPDOWN ITEM CLICKS ---
-document.getElementById('toggleOverpaint').addEventListener('click', (e) => {
-  e.preventDefault();
-  toggleOverpaintMode();
-});
-
-document.getElementById('toggleFill').addEventListener('click', (e) => {
-  e.preventDefault();
-  toggleFillMode();
 });
 
 // --- TRACKPAD/TOUCH CONTROLS ---

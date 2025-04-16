@@ -103,4 +103,72 @@ document.addEventListener('DOMContentLoaded', () => {
       redoMenuItem.classList.toggle('disabled', !canRedo);
     }
   });
+
+  // --- FILE MENU DROPDOWN ITEM CLICKS ---
+  document.getElementById('newFile').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.resetModel();
+  });
+
+  document.getElementById('openFile').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.importModel();
+  });
+
+  document.getElementById('saveFile').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.exportModel();
+  });
+
+  // --- EDIT MENU DROPDOWN ITEM CLICKS ---
+  document.getElementById('undoAction').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.handleUndo();
+  });
+  document.getElementById('redoAction').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.handleRedo();
+  });
+
+  // --- VIEW MENU DROPDOWN ITEM CLICKS ---
+  document.getElementById('upOneLayer').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.increaseVisibleLayers();
+  });
+
+  document.getElementById('downOneLayer').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.decreaseVisibleLayers();
+  });
+
+  document.getElementById('jumpToTop').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.jumpToTopLayer();
+  });
+
+  document.getElementById('jumpToBottom').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.jumpToBottomLayer();
+  });
+
+  document.getElementById('toggleXray').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.toggleXrayMode();
+  });
+
+  document.getElementById('toggleGrid').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.toggleGridVisibility();
+  });
+
+  // --- TOOLS MENU DROPDOWN ITEM CLICKS ---
+  document.getElementById('toggleOverpaint').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.toggleOverpaintMode();
+  });
+
+  document.getElementById('toggleFill').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.toggleFillMode();
+  });
 });
