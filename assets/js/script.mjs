@@ -37,8 +37,6 @@ const pointsPerAxis = size / resolution; // 160 / 10 = 16
 
 const voxelSize = resolution / 1000; // convert mm to meters for Three.js
 const baseMaterial = new THREE.SpriteMaterial({ color: COLORS.base });
-const activeMaterial = new THREE.SpriteMaterial({ color: COLORS.active });
-const hoverMaterial = new THREE.SpriteMaterial({ color: COLORS.hover });
 
 // Sparse Voxel Octree Stub (simplified)
 const voxelData = new Map(); // key = "x,y,z", value = 1
