@@ -67,6 +67,12 @@ canvas {
   background-color: #ededed;
 }
 
+/* Used for toggling a flash */
+.menu-label.hover {
+  color: black;
+  background-color: #ededed;
+}
+
 /* Dropdown container */
 .dropdown {
   position: absolute;

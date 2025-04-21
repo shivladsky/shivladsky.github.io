@@ -1,3 +1,5 @@
+import { flashMenuLabel } from './menubar.mjs';
+
 const keyState = new Set();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,16 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!window.VoxPaint.isPaintMode()) {
         window.VoxPaint.setToolMode('paint');
       }
+      flashMenuLabel('toolsMenu');
     }
 
     if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'o') {
       window.VoxPaint.toggleOverpaintMode();
+      flashMenuLabel('toolsMenu');
       e.preventDefault();
       return;
     }
 
     if (key === 'f') {
       window.VoxPaint.toggleFillMode();
+      flashMenuLabel('toolsMenu');
       e.preventDefault();
       return;
     }
@@ -30,24 +35,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LAYER CONTROLS ---
     if (isShift && key === 'q') {
       window.VoxPaint.jumpToBottomLayer();
+      flashMenuLabel('viewMenu');
       e.preventDefault();
     } else if (isShift && key === 'e') {
       window.VoxPaint.jumpToTopLayer();
+      flashMenuLabel('viewMenu');
       e.preventDefault();
     } else if (!isShift && key === 'q') {
       window.VoxPaint.decreaseVisibleLayers();
+      flashMenuLabel('viewMenu');
       e.preventDefault();
     } else if (!isShift && key === 'e') {
       window.VoxPaint.increaseVisibleLayers();
+      flashMenuLabel('viewMenu');
       e.preventDefault();
     }
 
     // --- XRAY & GRID ---
     else if (key === 'r') {
       window.VoxPaint.toggleXrayMode();
+      flashMenuLabel('viewMenu');
       e.preventDefault();
     } else if (key === 'tab') {
       window.VoxPaint.toggleGridVisibility();
+      flashMenuLabel('viewMenu');
       e.preventDefault();
     }
 
@@ -57,12 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
       (e.ctrlKey && key === 'y') // Ctrl+Y → Redo (Win)
     ) {
       window.VoxPaint.handleRedo();
+      flashMenuLabel('editMenu');
       e.preventDefault();
     } else if (
       (e.metaKey && key === 'z') || // Cmd+Z → Undo (Mac)
       (e.ctrlKey && key === 'z') // Ctrl+Z → Undo (Win)
     ) {
       window.VoxPaint.handleUndo();
+      flashMenuLabel('editMenu');
       e.preventDefault();
     }
 
@@ -70,9 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (isCmdOrCtrl && key === 'o') {
       e.preventDefault();
       window.VoxPaint.importModel();
+      flashMenuLabel('fileMenu');
     } else if (isCmdOrCtrl && key === 's') {
       e.preventDefault();
       window.VoxPaint.exportModel();
+      flashMenuLabel('fileMenu');
     }
   });
 

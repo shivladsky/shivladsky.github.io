@@ -1,3 +1,15 @@
+export function flashMenuLabel(menuId) {
+  requestAnimationFrame(() => {
+    const label = document.querySelector(`#${menuId}`);
+    if (!label) return;
+
+    label.classList.add('hover');
+    setTimeout(() => {
+      label.classList.remove('hover');
+    }, 100);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const menuLabels = document.querySelectorAll('.menu-label');
   let menuActive = false;
