@@ -156,11 +156,10 @@ canvas {
   position: fixed;
   top: 64px;
   right: 16px;
-  height: calc(100vh - 64px); /* Always under the menubar */
+  height: calc(100vh - 80px); /* Always under the menubar */
   display: grid;
   grid-auto-flow: column;
   grid-template-rows: repeat(16, 1fr); /* 16 swatches max vertically */
-  gap: 4px;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 8px;
   box-sizing: border-box;
