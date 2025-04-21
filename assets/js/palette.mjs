@@ -1,5 +1,6 @@
 /**
  * Parses JASC-PAL formatted text and returns an array of hex colors.
+ * Loads a maximum of 128 colors.
  */
 function parseJASCPAL(text) {
   const lines = text
@@ -12,7 +13,7 @@ function parseJASCPAL(text) {
     throw new Error('Invalid JASC-PAL header');
   }
 
-  const colorCount = parseInt(lines[2], 10);
+  const colorCount = Math.min(parseInt(lines[2], 10), 128);
   return lines.slice(3, 3 + colorCount).map((line) => {
     const [r, g, b] = line.split(/\s+/).map(Number);
     return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
