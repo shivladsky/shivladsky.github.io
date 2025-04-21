@@ -1,4 +1,5 @@
 import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js';
+import * as Palette from './palette.mjs';
 import { UndoManager } from './undo.mjs';
 
 /**
@@ -19,7 +20,7 @@ const COLORS = {
  * Initialized from COLORS.active and stays that way
  * until the user clicks a swatch in the palette UI.
  */
-let selectedColor = COLORS.active;
+const selectedColorRef = { value: COLORS.active };
 
 // VoxPaint Starter - 16x16x16cm cube with 10mm points
 const canvas = document.getElementById('viewportCanvas');
@@ -161,7 +162,7 @@ function tryPaintVoxel(e) {
   if (!isDeleteMode && !isPaintable) return false;
 
   const oldColor = voxelData.get(coord) || COLORS.base;
-  const newColor = isDeleteMode ? COLORS.base : selectedColor;
+  const newColor = isDeleteMode ? COLORS.base : selectedColorRef.value;
 
   // If the intended color is the same as the current color, nothing to do.
   if (oldColor === newColor) return false;
@@ -174,11 +175,11 @@ function tryPaintVoxel(e) {
     obj.material.color.set(COLORS.base);
     obj.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1);
   } else {
-    voxelData.set(coord, selectedColor);
+    voxelData.set(coord, selectedColorRef.value);
     if (obj.material === baseMaterial) {
       obj.material = obj.material.clone();
     }
-    obj.material.color.set(selectedColor);
+    obj.material.color.set(selectedColorRef.value);
     obj.scale.set(voxelSize, voxelSize, 1);
   }
 
@@ -204,7 +205,7 @@ function fillAtVoxel(e) {
   const currentColor = voxelData.has(startCoordStr)
     ? voxelData.get(startCoordStr)
     : COLORS.base;
-  const newColor = selectedColor;
+  const newColor = selectedColorRef.value;
   if (currentColor === newColor) return;
 
   // Begin a new stroke for undo/redo purposes.
@@ -449,56 +450,6 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-async function loadDefaultPalette() {
-  try {
-    const response = await fetch('./assets/data/dawnbringer-32.pal');
-    const text = await response.text();
-
-    // Clean BOM and Windows line endings
-    const textClean = text.replace(/^\uFEFF/, '');
-    const lines = textClean
-      .trim()
-      .split('\n')
-      .map((line) => line.trim());
-
-    if (lines[0] !== 'JASC-PAL' || lines[1] !== '0100') {
-      throw new Error('Invalid JASC-PAL header');
-    }
-
-    const colorCount = parseInt(lines[2], 10);
-    const hexColors = lines.slice(3, 3 + colorCount).map((line) => {
-      const [r, g, b] = line.split(/\s+/).map(Number);
-      return `#${[r, g, b]
-        .map((v) => v.toString(16).padStart(2, '0'))
-        .join('')}`;
-    });
-
-    // Clear and populate the palette panel
-    const panel = document.getElementById('colorPalettePanel');
-    panel.innerHTML = '';
-
-    hexColors.forEach((colorHex) => {
-      const square = document.createElement('div');
-      square.classList.add('colorSwatch');
-      square.style.backgroundColor = colorHex;
-
-      square.addEventListener('click', () => {
-        selectedColor = colorHex;
-
-        document
-          .querySelectorAll('#colorPalettePanel .colorSwatch')
-          .forEach((sq) => sq.classList.remove('active'));
-
-        square.classList.add('active');
-      });
-
-      panel.appendChild(square);
-    });
-  } catch (error) {
-    console.error('Failed to load JASC-PAL palette:', error);
-  }
-}
-
 function dispatchVisibleLayerChanged() {
   const canGoDown = visibleLayerCount > 1;
   const canGoUp = visibleLayerCount < pointsPerAxis;
@@ -526,7 +477,7 @@ function dispatchModeChanged(mode, value) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  loadDefaultPalette();
+  Palette.loadDefaultPalette(selectedColorRef);
   undoManager.dispatchUndoRedoChanged();
   dispatchVisibleLayerChanged();
   dispatchModeChanged('grid', showEmptyVoxels);
