@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
       maxWidth = Math.max(maxWidth, item.offsetWidth);
     });
 
-    dropdown.style.minWidth = `${maxWidth + (anyChecked ? 32 : 0)}px`;
+    dropdown.style.minWidth = `${maxWidth}px`;
   });
 
   // --- FILE MENU DROPDOWN ITEM CLICKS ---
