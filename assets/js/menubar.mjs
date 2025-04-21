@@ -179,6 +179,41 @@ document.addEventListener('DOMContentLoaded', () => {
     dropdown.style.minWidth = `${maxWidth}px`;
   });
 
+  // Handle palette changes
+  document.addEventListener('paletteChanged', (event) => {
+    const { palette } = event.detail;
+
+    const paletteToElementId = {
+      default16: 'loadDefault16',
+      default32: 'loadDefault32',
+    };
+
+    // Remove existing checks
+    Object.values(paletteToElementId).forEach((id) => {
+      const item = document.getElementById(id);
+      if (item) item.classList.remove('checked');
+    });
+
+    const elementId = paletteToElementId[palette];
+    const menuItem = document.getElementById(elementId);
+    if (menuItem) menuItem.classList.add('checked');
+
+    const dropdown = menuItem.closest('.dropdown');
+    if (dropdown) {
+      const anyChecked = dropdown.querySelector('.dropdown-item.checked');
+      dropdown.classList.toggle('with-checks', !!anyChecked);
+
+      // Recalculate dropdown minWidth if needed
+      dropdown.style.minWidth = 'auto';
+      let maxWidth = 0;
+      dropdown.querySelectorAll('.dropdown-item').forEach((item) => {
+        item.style.minWidth = 'auto';
+        maxWidth = Math.max(maxWidth, item.offsetWidth);
+      });
+      dropdown.style.minWidth = `${maxWidth}px`;
+    }
+  });
+
   // --- FILE MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('newFile').addEventListener('click', (e) => {
     e.preventDefault();
@@ -234,6 +269,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('toggleGrid').addEventListener('click', (e) => {
     e.preventDefault();
     window.VoxPaint.toggleGridVisibility();
+  });
+
+  // --- PALETTE MENU STATE UPDATES ---
+  document.getElementById('loadDefault16').addEventListener('click', (e) => {
+    e.preventDefault();
+    import('./palette.mjs').then((Palette) =>
+      Palette.loadDefault16(window.selectedColorRef)
+    );
+  });
+
+  document.getElementById('loadDefault32').addEventListener('click', (e) => {
+    e.preventDefault();
+    import('./palette.mjs').then((Palette) =>
+      Palette.loadDefault32(window.selectedColorRef)
+    );
   });
 
   // --- TOOLS MENU DROPDOWN ITEM CLICKS ---

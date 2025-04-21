@@ -21,6 +21,7 @@ const COLORS = {
  * until the user clicks a swatch in the palette UI.
  */
 const selectedColorRef = { value: COLORS.active };
+window.selectedColorRef = selectedColorRef;
 
 // VoxPaint Starter - 16x16x16cm cube with 10mm points
 const canvas = document.getElementById('viewportCanvas');
@@ -477,7 +478,7 @@ function dispatchModeChanged(mode, value) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  Palette.loadDefaultPalette(selectedColorRef);
+  Palette.loadDefault32(selectedColorRef);
   undoManager.dispatchUndoRedoChanged();
   dispatchVisibleLayerChanged();
   dispatchModeChanged('grid', showEmptyVoxels);

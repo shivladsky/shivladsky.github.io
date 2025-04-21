@@ -50,12 +50,36 @@ function renderPaletteSwatches(hexColors, selectedColorRef) {
  * Loads a JASC-PAL formatted palette and injects swatches into #colorPalettePanel.
  * When clicked, a swatch updates the global selectedColor.
  */
-export async function loadDefaultPalette(selectedColorRef) {
+export async function loadDefault32(selectedColorRef) {
   try {
     const response = await fetch('./assets/data/dawnbringer-32.pal');
     const text = await response.text();
     const hexColors = parseJASCPAL(text);
     renderPaletteSwatches(hexColors, selectedColorRef);
+
+    // Dispatch event when palette is successfully loaded
+    document.dispatchEvent(
+      new CustomEvent('paletteChanged', {
+        detail: { palette: 'default32' },
+      })
+    );
+  } catch (error) {
+    console.error('Failed to load JASC-PAL palette:', error);
+  }
+}
+
+export async function loadDefault16(selectedColorRef) {
+  try {
+    const response = await fetch('./assets/data/dawnbringer-16.pal');
+    const text = await response.text();
+    const hexColors = parseJASCPAL(text);
+    renderPaletteSwatches(hexColors, selectedColorRef);
+
+    document.dispatchEvent(
+      new CustomEvent('paletteChanged', {
+        detail: { palette: 'default16' },
+      })
+    );
   } catch (error) {
     console.error('Failed to load JASC-PAL palette:', error);
   }
