@@ -608,6 +608,12 @@ function loadModel(data) {
   undoManager.clearHistory();
 
   updateVoxelVisibility(); // Reapply visibility logic after changes
+
+  // Jump to top layer to show everything
+  VoxPaint.jumpToTopLayer();
+
+  // Turn off grid if it was on
+  if (showEmptyVoxels) VoxPaint.toggleGridVisibility();
 }
 
 async function exportModel() {
