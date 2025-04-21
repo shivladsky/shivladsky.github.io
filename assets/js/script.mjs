@@ -1,14 +1,25 @@
 import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js';
 import { UndoManager } from './undo.mjs';
 
-// Core built-in colours that load with VoxPaint before any palettes
+/**
+ * Core UI built-in colour roles for VoxPaint.
+ * These three are guaranteed defaults:
+ *   • base   – the immutable empty voxel colour - never changes
+ *   • hover  – the immutable highlight colour on mouseover - never changes
+ *   • active – the default and fallback paint colour
+ */
 const COLORS = {
-  base: '#505050', // Immutable empty voxel colour - never changes
-  hover: '#EDEDED', // Immutable highlight colour on mouseover - never changes
-  active: '#6ABE30', // Default and fallback paint colour
+  base: '#505050',
+  hover: '#EDEDED',
+  active: '#6ABE30',
 };
 
-let selectedColor = COLORS.active; // Default to built-in green
+/**
+ * The colour currently in use for painting/filling.
+ * Initialized from COLORS.active and stays that way
+ * until the user clicks a swatch in the palette UI.
+ */
+let selectedColor = COLORS.active;
 
 // VoxPaint Starter - 16x16x16cm cube with 10mm points
 const canvas = document.getElementById('viewportCanvas');
