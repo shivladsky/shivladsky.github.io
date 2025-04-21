@@ -20,6 +20,33 @@ function parseJASCPAL(text) {
 }
 
 /**
+ * Renders color swatches into the #colorPalettePanel and attaches click events
+ * to update selectedColorRef when a swatch is clicked.
+ */
+function renderPaletteSwatches(hexColors, selectedColorRef) {
+  const panel = document.getElementById('colorPalettePanel');
+  panel.innerHTML = '';
+
+  hexColors.forEach((colorHex) => {
+    const square = document.createElement('div');
+    square.classList.add('colorSwatch');
+    square.style.backgroundColor = colorHex;
+
+    square.addEventListener('click', () => {
+      selectedColorRef.value = colorHex;
+
+      document
+        .querySelectorAll('#colorPalettePanel .colorSwatch')
+        .forEach((sq) => sq.classList.remove('active'));
+
+      square.classList.add('active');
+    });
+
+    panel.appendChild(square);
+  });
+}
+
+/**
  * Loads a JASC-PAL formatted palette and injects swatches into #colorPalettePanel.
  * When clicked, a swatch updates the global selectedColor.
  */
@@ -28,27 +55,7 @@ export async function loadDefaultPalette(selectedColorRef) {
     const response = await fetch('./assets/data/dawnbringer-32.pal');
     const text = await response.text();
     const hexColors = parseJASCPAL(text);
-
-    const panel = document.getElementById('colorPalettePanel');
-    panel.innerHTML = '';
-
-    hexColors.forEach((colorHex) => {
-      const square = document.createElement('div');
-      square.classList.add('colorSwatch');
-      square.style.backgroundColor = colorHex;
-
-      square.addEventListener('click', () => {
-        selectedColorRef.value = colorHex;
-
-        document
-          .querySelectorAll('#colorPalettePanel .colorSwatch')
-          .forEach((sq) => sq.classList.remove('active'));
-
-        square.classList.add('active');
-      });
-
-      panel.appendChild(square);
-    });
+    renderPaletteSwatches(hexColors, selectedColorRef);
   } catch (error) {
     console.error('Failed to load JASC-PAL palette:', error);
   }
