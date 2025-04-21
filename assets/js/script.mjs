@@ -1,14 +1,14 @@
 import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js';
 import { UndoManager } from './undo.mjs';
 
-// Color palette
+// Core built-in colours that load with VoxPaint before any palettes
 const COLORS = {
-  base: '#505050',
-  active: '#6ABE30',
-  hover: '#EDEDED',
+  base: '#505050', // Immutable empty voxel colour - never changes
+  hover: '#EDEDED', // Immutable highlight colour on mouseover - never changes
+  active: '#6ABE30', // Default and fallback paint colour
 };
 
-let selectedColor = COLORS.active; // Default to green
+let selectedColor = COLORS.active; // Default to built-in green
 
 // VoxPaint Starter - 16x16x16cm cube with 10mm points
 const canvas = document.getElementById('viewportCanvas');
