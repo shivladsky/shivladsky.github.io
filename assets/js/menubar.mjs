@@ -167,11 +167,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropdownItems = Array.from(
       dropdown.querySelectorAll('.dropdown-item')
     );
+    // Reset dropdown width first to avoid cumulative growth
+    dropdown.style.minWidth = 'auto';
+
     let maxWidth = 0;
     dropdownItems.forEach((item) => {
-      item.style.minWidth = 'auto'; // reset before measuring
+      item.style.minWidth = 'auto'; // also reset individual items just in case
       maxWidth = Math.max(maxWidth, item.offsetWidth);
     });
+
     dropdown.style.minWidth = `${maxWidth + (anyChecked ? 32 : 0)}px`;
   });
 
