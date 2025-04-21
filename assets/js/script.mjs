@@ -455,7 +455,7 @@ async function loadDefaultPalette() {
     }
 
     const colorCount = parseInt(lines[2], 10);
-    const hexColors = lines.slice(4, 4 + colorCount).map((line) => {
+    const hexColors = lines.slice(3, 3 + colorCount).map((line) => {
       const [r, g, b] = line.split(/\s+/).map(Number);
       return `#${[r, g, b]
         .map((v) => v.toString(16).padStart(2, '0'))
