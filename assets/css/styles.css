@@ -154,29 +154,27 @@ canvas {
 
 #colorPalettePanel {
   position: fixed;
-  top: 64px; /* Matches the menubar height */
+  top: 64px;
   right: 16px;
-  width: 60px;
-  height: calc(100vh - 64px);
-  padding: 8px 4px 32px 4px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  align-items: center;
+  height: calc(100vh - 64px); /* Always under the menubar */
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(16, 1fr); /* 16 swatches max vertically */
+  gap: 4px;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 20;
+  padding: 8px;
   box-sizing: border-box;
+  z-index: 20;
+  overflow: auto;
 }
 
 .colorSwatch {
-  width: 100%;
   aspect-ratio: 1 / 1;
-  min-height: 16px;
-  min-width: 16px;
+  width: 100%; /* Fill column width automatically */
   border: 2px solid #000;
   box-sizing: border-box;
   cursor: pointer;
-  background-color: #000; /* placeholder color */
+  background-color: #000;
 }
 
 .colorSwatch:hover,
