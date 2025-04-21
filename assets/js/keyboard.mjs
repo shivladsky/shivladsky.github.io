@@ -9,14 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const isShift = e.shiftKey;
 
     // --- TOGGLE MODES ---
-    if (key === 'f') {
-      window.VoxPaint.toggleFillMode();
-      e.preventDefault();
-      return;
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'p') {
+      if (!window.VoxPaint.isPaintMode()) {
+        window.VoxPaint.setToolMode('paint');
+      }
     }
 
     if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'o') {
       window.VoxPaint.toggleOverpaintMode();
+      e.preventDefault();
+      return;
+    }
+
+    if (key === 'f') {
+      window.VoxPaint.toggleFillMode();
       e.preventDefault();
       return;
     }

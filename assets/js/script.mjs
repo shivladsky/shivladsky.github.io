@@ -484,6 +484,14 @@ function dispatchModeChanged(mode, value) {
       detail: { mode, value },
     })
   );
+
+  // Paint is implicit — update its menu state as complement of Fill and Overpaint
+  const isPaint = !overpaintMode && !fillMode;
+  document.dispatchEvent(
+    new CustomEvent('modeChanged', {
+      detail: { mode: 'paint', value: isPaint },
+    })
+  );
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -491,6 +499,7 @@ window.addEventListener('DOMContentLoaded', () => {
   undoManager.dispatchUndoRedoChanged();
   dispatchVisibleLayerChanged();
   dispatchModeChanged('grid', showEmptyVoxels);
+  dispatchModeChanged('paint', true);
 });
 
 // --- Control Functions ---
@@ -542,13 +551,63 @@ function toggleGridVisibility() {
   dispatchModeChanged('grid', showEmptyVoxels);
 }
 
+function setToolMode(mode) {
+  // Valid modes: 'paint', 'overpaint', 'fill'
+
+  // Do nothing if the tool is already active
+  if (
+    (mode === 'paint' && !overpaintMode && !fillMode) ||
+    (mode === 'overpaint' && overpaintMode) ||
+    (mode === 'fill' && fillMode)
+  ) {
+    return;
+  }
+
+  const wasOverpaint = overpaintMode;
+  const wasFill = fillMode;
+
+  // Reset all
+  overpaintMode = false;
+  fillMode = false;
+
+  if (mode === 'overpaint') {
+    overpaintMode = true;
+  } else if (mode === 'fill') {
+    fillMode = true;
+  }
+
+  // Only dispatch events if the state actually changed
+  if (wasOverpaint !== overpaintMode) {
+    dispatchModeChanged('overpaint', overpaintMode);
+  }
+  if (wasFill !== fillMode) {
+    dispatchModeChanged('fill', fillMode);
+  }
+
+  // Implicitly update paint status
+  const isPaint = !overpaintMode && !fillMode;
+  dispatchModeChanged('paint', isPaint);
+}
+
 function toggleOverpaintMode() {
   overpaintMode = !overpaintMode;
+
+  if (overpaintMode && fillMode) {
+    fillMode = false;
+    dispatchModeChanged('fill', fillMode);
+  }
+
   dispatchModeChanged('overpaint', overpaintMode);
 }
 
 function toggleFillMode() {
   fillMode = !fillMode;
+
+  if (fillMode && overpaintMode) {
+    overpaintMode = false;
+    dispatchModeChanged('overpaint', overpaintMode);
+  }
+
   dispatchModeChanged('fill', fillMode);
 }
 
@@ -696,6 +755,10 @@ window.VoxPaint = {
   toggleGridVisibility,
   toggleOverpaintMode,
   toggleFillMode,
+  setToolMode,
+  isPaintMode: () => !overpaintMode && !fillMode,
+  isOverpaintMode: () => overpaintMode,
+  isFillMode: () => fillMode,
 };
 
 animate();

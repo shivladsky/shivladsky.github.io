@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modeToElementId = {
       xray: 'toggleXray',
       grid: 'toggleGrid',
+      paint: 'togglePaint',
       overpaint: 'toggleOverpaint',
       fill: 'toggleFill',
     };
@@ -220,6 +221,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- TOOLS MENU DROPDOWN ITEM CLICKS ---
+  document.getElementById('togglePaint').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.VoxPaint.setToolMode('paint');
+  });
+
   document.getElementById('toggleOverpaint').addEventListener('click', (e) => {
     e.preventDefault();
     window.VoxPaint.toggleOverpaintMode();
