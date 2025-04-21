@@ -440,31 +440,51 @@ function animate() {
 
 async function loadDefaultPalette() {
   try {
-    const response = await fetch('./assets/data/db32.json');
-    const palette = await response.json();
-    const paletteSquares = document.querySelectorAll(
-      '#colorPalettePanel .colorSwatch'
-    );
+    const response = await fetch('./assets/data/dawnbringer-32.pal');
+    const text = await response.text();
 
-    paletteSquares.forEach((square, index) => {
-      if (palette[index]) {
-        const colorHex = palette[index];
-        square.style.backgroundColor = colorHex;
+    // Clean BOM and Windows line endings
+    const textClean = text.replace(/^\uFEFF/, '');
+    const lines = textClean
+      .trim()
+      .split('\n')
+      .map((line) => line.trim());
 
-        square.addEventListener('click', () => {
-          // Update selectedColor
-          selectedColor = colorHex;
+    if (lines[0] !== 'JASC-PAL' || lines[1] !== '0100') {
+      throw new Error('Invalid JASC-PAL header');
+    }
 
-          // Highlight active square
-          document
-            .querySelectorAll('#colorPalettePanel .colorSwatch')
-            .forEach((sq) => sq.classList.remove('active'));
-          square.classList.add('active');
-        });
-      }
+    const colorCount = parseInt(lines[2], 10);
+    const hexColors = lines.slice(4, 4 + colorCount).map((line) => {
+      const [r, g, b] = line.split(/\s+/).map(Number);
+      return `#${[r, g, b]
+        .map((v) => v.toString(16).padStart(2, '0'))
+        .join('')}`;
+    });
+
+    // Clear and populate the palette panel
+    const panel = document.getElementById('colorPalettePanel');
+    panel.innerHTML = '';
+
+    hexColors.forEach((colorHex) => {
+      const square = document.createElement('div');
+      square.classList.add('colorSwatch');
+      square.style.backgroundColor = colorHex;
+
+      square.addEventListener('click', () => {
+        selectedColor = colorHex;
+
+        document
+          .querySelectorAll('#colorPalettePanel .colorSwatch')
+          .forEach((sq) => sq.classList.remove('active'));
+
+        square.classList.add('active');
+      });
+
+      panel.appendChild(square);
     });
   } catch (error) {
-    console.error('Failed to load default palette:', error);
+    console.error('Failed to load JASC-PAL palette:', error);
   }
 }
 
