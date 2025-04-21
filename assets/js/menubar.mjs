@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let maxWidth = 0;
     dropdownItems.forEach((item) => {
-      item.style.minWidth = 'auto'; // also reset individual items just in case
+      item.style.minWidth = 'auto'; // Also reset individual items just in case
       maxWidth = Math.max(maxWidth, item.offsetWidth);
     });
 
