@@ -22,8 +22,8 @@
         <a href="#" class="menu-label" id="fileMenu">File</a>
         <div class="dropdown">
           <a href="#" class="dropdown-item" id="newFile">New</a>
-          <a href="#" class="dropdown-item" id="openFile">Open</a>
-          <a href="#" class="dropdown-item" id="saveFile">Save</a>
+          <a href="#" class="dropdown-item" id="openFile">Open...</a>
+          <a href="#" class="dropdown-item" id="saveFile">Save As...</a>
         </div>
       </div>
 
@@ -52,6 +52,7 @@
         <div class="dropdown">
           <a href="#" class="dropdown-item" id="loadDefault16">DawnBringer 16</a>
           <a href="#" class="dropdown-item" id="loadDefault32">DawnBringer 32</a>
+          <a href="#" class="dropdown-item" id="importPalette">Load From File...</a>
         </div>
       </div>
 
@@ -68,6 +69,7 @@
   </div>
 
     <div id="colorPalettePanel"></div>
+    <input type="file" id="paletteFileInput" accept=".pal" style="display: none;" />
 
     <script type="module" src="./assets/js/script.mjs"></script>
     <script type="module" src="./assets/js/menubar.mjs"></script>

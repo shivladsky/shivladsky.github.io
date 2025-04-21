@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const paletteToElementId = {
       default16: 'loadDefault16',
       default32: 'loadDefault32',
+      custom: 'importPalette',
     };
 
     // Remove existing checks
@@ -213,6 +214,21 @@ document.addEventListener('DOMContentLoaded', () => {
       dropdown.style.minWidth = `${maxWidth}px`;
     }
   });
+
+  document
+    .getElementById('paletteFileInput')
+    .addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      import('./palette.mjs').then((Palette) => {
+        Palette.loadPaletteFromFile(file, window.selectedColorRef).catch(
+          (err) => {
+            alert('Failed to load palette: ' + err.message);
+          }
+        );
+      });
+    });
 
   // --- FILE MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('newFile').addEventListener('click', (e) => {
@@ -271,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.VoxPaint.toggleGridVisibility();
   });
 
-  // --- PALETTE MENU STATE UPDATES ---
+  // --- PALETTE MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('loadDefault16').addEventListener('click', (e) => {
     e.preventDefault();
     import('./palette.mjs').then((Palette) =>
@@ -284,6 +300,15 @@ document.addEventListener('DOMContentLoaded', () => {
     import('./palette.mjs').then((Palette) =>
       Palette.loadDefault32(window.selectedColorRef)
     );
+  });
+
+  document.getElementById('importPalette').addEventListener('click', (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById('paletteFileInput');
+    if (fileInput) {
+      fileInput.value = ''; // Reset in case the same file is chosen again
+      fileInput.click();
+    }
   });
 
   // --- TOOLS MENU DROPDOWN ITEM CLICKS ---

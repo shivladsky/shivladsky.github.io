@@ -84,3 +84,34 @@ export async function loadDefault16(selectedColorRef) {
     console.error('Failed to load JASC-PAL palette:', error);
   }
 }
+
+export function loadPaletteFromFile(file, selectedColorRef) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = reader.result;
+        const hexColors = parseJASCPAL(text);
+        renderPaletteSwatches(hexColors, selectedColorRef);
+
+        document.dispatchEvent(
+          new CustomEvent('paletteChanged', {
+            detail: { palette: 'custom' },
+          })
+        );
+
+        resolve();
+      } catch (err) {
+        console.error('Invalid .pal file:', err);
+        reject(err);
+      }
+    };
+
+    reader.onerror = () => {
+      console.error('Failed to read file:', reader.error);
+      reject(reader.error);
+    };
+
+    reader.readAsText(file);
+  });
+}
