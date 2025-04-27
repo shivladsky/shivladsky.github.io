@@ -1,3 +1,23 @@
+// List of built-in palettes
+export const BuiltInPalettes = {
+  zxspectrum: {
+    name: 'ZX Spectrum',
+    path: './assets/data/zx-spectrum-adjusted.pal',
+  },
+  commodore64: {
+    name: 'Commodore 64',
+    path: './assets/data/commodore64.pal',
+  },
+  dawnbringer16: {
+    name: 'DawnBringer 16',
+    path: './assets/data/dawnbringer-16.pal',
+  },
+  dawnbringer32: {
+    name: 'DawnBringer 32',
+    path: './assets/data/dawnbringer-32.pal',
+  },
+};
+
 /**
  * Parses JASC-PAL formatted text and returns an array of hex colors.
  * Loads a maximum of 128 colors.
@@ -51,39 +71,26 @@ function renderPaletteSwatches(hexColors, selectedColorRef) {
  * Loads a JASC-PAL formatted palette and injects swatches into #colorPalettePanel.
  * When clicked, a swatch updates the global selectedColor.
  */
-export async function loadDefault32(selectedColorRef) {
-  try {
-    const response = await fetch('./assets/data/dawnbringer-32.pal');
-    const text = await response.text();
-    const hexColors = parseJASCPAL(text);
-    renderPaletteSwatches(hexColors, selectedColorRef);
+export async function loadBuiltInPalette(paletteKey, selectedColorRef) {
+  const paletteInfo = BuiltInPalettes[paletteKey];
+  if (!paletteInfo) throw new Error(`Unknown built-in palette: ${paletteKey}`);
 
-    // Dispatch event when palette is successfully loaded
-    document.dispatchEvent(
-      new CustomEvent('paletteChanged', {
-        detail: { palette: 'default32' },
-      })
-    );
-  } catch (error) {
-    console.error('Failed to load JASC-PAL palette:', error);
-  }
-}
+  const response = await fetch(paletteInfo.path);
+  if (!response.ok)
+    throw new Error(`Failed to load palette from ${paletteInfo.path}`);
 
-export async function loadDefault16(selectedColorRef) {
-  try {
-    const response = await fetch('./assets/data/dawnbringer-16.pal');
-    const text = await response.text();
-    const hexColors = parseJASCPAL(text);
-    renderPaletteSwatches(hexColors, selectedColorRef);
+  const text = await response.text();
+  const hexColors = parseJASCPAL(text);
 
-    document.dispatchEvent(
-      new CustomEvent('paletteChanged', {
-        detail: { palette: 'default16' },
-      })
-    );
-  } catch (error) {
-    console.error('Failed to load JASC-PAL palette:', error);
-  }
+  renderPaletteSwatches(hexColors, selectedColorRef);
+
+  document.dispatchEvent(
+    new CustomEvent('paletteChanged', {
+      detail: { palette: paletteKey },
+    })
+  );
+
+  return hexColors;
 }
 
 export function loadPaletteFromFile(file, selectedColorRef) {

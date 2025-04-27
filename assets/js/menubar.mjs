@@ -1,3 +1,5 @@
+import { BuiltInPalettes } from './palette.mjs';
+
 export function flashMenuLabel(menuId) {
   requestAnimationFrame(() => {
     const label = document.querySelector(`#${menuId}`);
@@ -179,32 +181,77 @@ document.addEventListener('DOMContentLoaded', () => {
     dropdown.style.minWidth = `${maxWidth}px`;
   });
 
+  // Dynamically build the Palette menu dropdown
+  const paletteDropdown = document.querySelector('#paletteMenu + .dropdown');
+  if (paletteDropdown) {
+    // Clear current palette items except "Load From File..." and "Get More..."
+    const reservedItems = ['importPalette', 'getMorePalettes'];
+    const reservedElements = reservedItems.map((id) =>
+      document.getElementById(id)
+    );
+
+    paletteDropdown.innerHTML = ''; // Clear
+    Object.entries(BuiltInPalettes).forEach(([key, { name }]) => {
+      const a = document.createElement('a');
+      a.href = '#';
+      a.className = 'dropdown-item';
+      a.id = `palette-${key}`; // id like palette-dawnbringer32
+      a.dataset.palette = key;
+      a.textContent = name;
+      paletteDropdown.appendChild(a);
+    });
+
+    // Add back reserved items
+    reservedElements.forEach((el) => {
+      if (el) {
+        paletteDropdown.appendChild(el);
+      }
+    });
+
+    // Attach click handlers for all built-in palettes
+    paletteDropdown.querySelectorAll('[data-palette]').forEach((menuItem) => {
+      menuItem.addEventListener('click', (e) => {
+        e.preventDefault();
+        const paletteKey = menuItem.dataset.palette;
+        import('./palette.mjs').then((Palette) => {
+          Palette.loadBuiltInPalette(paletteKey, window.selectedColorRef).catch(
+            (err) => {
+              alert('Failed to load palette: ' + err.message);
+            }
+          );
+        });
+      });
+    });
+  }
+
   // Handle palette changes
   document.addEventListener('paletteChanged', (event) => {
     const { palette } = event.detail;
 
-    const paletteToElementId = {
-      default16: 'loadDefault16',
-      default32: 'loadDefault32',
-      custom: 'importPalette',
-    };
+    // Clear previous checks
+    document
+      .querySelectorAll('#paletteMenu + .dropdown .dropdown-item')
+      .forEach((item) => {
+        item.classList.remove('checked');
+      });
 
-    // Remove existing checks
-    Object.values(paletteToElementId).forEach((id) => {
-      const item = document.getElementById(id);
-      if (item) item.classList.remove('checked');
-    });
+    // Determine the correct menu item ID
+    let elementId;
+    if (palette === 'custom') {
+      elementId = 'importPalette';
+    } else {
+      elementId = `palette-${palette}`; // built-in palettes use id like palette-dawnbringer32
+    }
 
-    const elementId = paletteToElementId[palette];
     const menuItem = document.getElementById(elementId);
     if (menuItem) menuItem.classList.add('checked');
 
-    const dropdown = menuItem.closest('.dropdown');
+    // Update dropdown width (optional polish)
+    const dropdown = menuItem ? menuItem.closest('.dropdown') : null;
     if (dropdown) {
       const anyChecked = dropdown.querySelector('.dropdown-item.checked');
       dropdown.classList.toggle('with-checks', !!anyChecked);
 
-      // Recalculate dropdown minWidth if needed
       dropdown.style.minWidth = 'auto';
       let maxWidth = 0;
       dropdown.querySelectorAll('.dropdown-item').forEach((item) => {
@@ -288,20 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- PALETTE MENU DROPDOWN ITEM CLICKS ---
-  document.getElementById('loadDefault16').addEventListener('click', (e) => {
-    e.preventDefault();
-    import('./palette.mjs').then((Palette) =>
-      Palette.loadDefault16(window.selectedColorRef)
-    );
-  });
-
-  document.getElementById('loadDefault32').addEventListener('click', (e) => {
-    e.preventDefault();
-    import('./palette.mjs').then((Palette) =>
-      Palette.loadDefault32(window.selectedColorRef)
-    );
-  });
-
   document.getElementById('importPalette').addEventListener('click', (e) => {
     e.preventDefault();
     const fileInput = document.getElementById('paletteFileInput');

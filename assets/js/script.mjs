@@ -479,7 +479,7 @@ function dispatchModeChanged(mode, value) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  Palette.loadDefault32(selectedColorRef);
+  Palette.loadBuiltInPalette('dawnbringer32', selectedColorRef);
   undoManager.dispatchUndoRedoChanged();
   dispatchVisibleLayerChanged();
   dispatchModeChanged('grid', showEmptyVoxels);
