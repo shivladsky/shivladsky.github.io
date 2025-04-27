@@ -1,4 +1,5 @@
 import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js';
+import * as Model from './model.mjs';
 import * as Palette from './palette.mjs';
 import { UndoManager } from './undo.mjs';
 
@@ -596,107 +597,33 @@ function toggleFillMode() {
 
 // --- Model Import/Export ---
 function resetModel() {
-  voxelData.clear();
-
-  for (const dot of dots) {
-    dot.material.color.set(COLORS.base);
-    dot.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1); // Back to default size
-  }
-
-  // Clear the undo/redo history
-  undoManager.clearHistory();
-
-  updateVoxelVisibility();
+  Model.resetModel(
+    voxelData,
+    dots,
+    COLORS,
+    voxelSize,
+    undoManager,
+    updateVoxelVisibility
+  );
 }
 
 function importModel() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => loadModel(JSON.parse(reader.result));
-    reader.readAsText(file);
-  };
-  input.click();
-}
-
-function loadModel(data) {
-  voxelData.clear();
-
-  // Reset every dot to blank state
-  for (const dot of dots) {
-    dot.material.color.set(COLORS.base);
-    dot.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1);
-  }
-
-  // Apply imported voxel data
-  for (const { x, y, z, color } of data) {
-    const coord = `${x},${y},${z}`;
-    voxelData.set(coord, color);
-    const dot = dots.find((d) => d.userData.coord === coord);
-    if (dot) {
-      // Clone the material if it's still the shared baseMaterial
-      if (dot.material === baseMaterial) {
-        dot.material = dot.material.clone();
-      }
-      dot.material.color.set(color);
-      dot.scale.set(voxelSize, voxelSize, 1); // Full size for active voxel
+  Model.importModel(
+    voxelData,
+    dots,
+    COLORS,
+    voxelSize,
+    undoManager,
+    updateVoxelVisibility,
+    () => {
+      VoxPaint.jumpToTopLayer();
+      if (showEmptyVoxels) VoxPaint.toggleGridVisibility();
     }
-  }
-
-  // Clear undo/redo history after import
-  undoManager.clearHistory();
-
-  updateVoxelVisibility(); // Reapply visibility logic after changes
-
-  // Jump to top layer to show everything
-  VoxPaint.jumpToTopLayer();
-
-  // Turn off grid if it was on
-  if (showEmptyVoxels) VoxPaint.toggleGridVisibility();
+  );
 }
 
 async function exportModel() {
-  const model = Array.from(voxelData.entries()).map(([key, color]) => {
-    const [x, y, z] = key.split(',').map(Number);
-    return { x, y, z, color };
-  });
-
-  const filename = `model-${Date.now()}.json`;
-  const json = JSON.stringify(model, null, 2); // Pretty-print
-
-  if ('showSaveFilePicker' in window) {
-    try {
-      const fileHandle = await window.showSaveFilePicker({
-        suggestedName: filename,
-        types: [
-          {
-            description: 'JSON file',
-            accept: { 'application/json': ['.json'] },
-          },
-        ],
-      });
-
-      const writable = await fileHandle.createWritable();
-      await writable.write(json);
-      await writable.close();
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.error('Save failed:', err);
-      }
-    }
-  } else {
-    // Fallback: force download via link
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
-  }
+  await Model.exportModel(voxelData);
 }
 
 // Bind events
