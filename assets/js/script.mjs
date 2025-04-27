@@ -605,6 +605,11 @@ function resetModel() {
     undoManager,
     updateVoxelVisibility
   );
+
+  // Reset UI
+  if (xrayMode) VoxPaint.toggleXrayMode();
+  if (!showEmptyVoxels) VoxPaint.toggleGridVisibility();
+  VoxPaint.jumpToBottomLayer();
 }
 
 function importModel() {
