@@ -1,20 +1,40 @@
 // List of built-in palettes
 export const BuiltInPalettes = {
-  zxspectrum: {
-    name: 'ZX Spectrum',
-    path: './assets/data/zx-spectrum-adjusted.pal',
+  ammo8: {
+    name: 'Ammo-8',
+    path: './assets/data/ammo-8.pal',
   },
-  commodore64: {
-    name: 'Commodore 64',
-    path: './assets/data/commodore64.pal',
+  slso8: {
+    name: 'SLSO8',
+    path: './assets/data/slso8.pal',
   },
-  dawnbringer16: {
-    name: 'DawnBringer 16',
-    path: './assets/data/dawnbringer-16.pal',
+  pico8: {
+    name: 'PICO-8',
+    path: './assets/data/pico-8.pal',
+  },
+  lostcentury: {
+    name: 'Lost Century',
+    path: './assets/data/lost-century.pal',
   },
   dawnbringer32: {
     name: 'DawnBringer 32',
     path: './assets/data/dawnbringer-32.pal',
+  },
+  lospec500: {
+    name: 'Lospec500',
+    path: './assets/data/lospec500.pal',
+  },
+  apollo: {
+    name: 'Apollo',
+    path: './assets/data/apollo.pal',
+  },
+  endesga64: {
+    name: 'Endesga 64',
+    path: './assets/data/endesga-64.pal',
+  },
+  resurrect64: {
+    name: 'Resurrect 64',
+    path: './assets/data/resurrect-64.pal',
   },
 };
 
