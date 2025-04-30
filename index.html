@@ -12,6 +12,11 @@
     <link rel="stylesheet" href="./assets/css/styles.css" />
   </head>
   <body>
+    <!-- Basic pageview tracking -->
+    <script type="module">
+      (async()=>{try{await fetch("https://shivlogger.shivladsky.workers.dev",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"pageview",event_source:"voxpaint",timestamp:Math.floor(Date.now()/1e3),nonce:crypto.randomUUID(),url:location.href,user_agent:navigator.userAgent,referrer:document.referrer})})}catch(e){console.warn("Tracking failed:",e)}})();
+      </script>
+
     <canvas id="viewportCanvas"></canvas>
 
     <div id="titleOverlay">VoxPaint</div>
