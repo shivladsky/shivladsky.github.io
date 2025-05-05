@@ -40,9 +40,6 @@ export const BuiltInPalettes = {
   },
 };
 
-/**
- * Parses JASC-PAL formatted text and returns an array of hex colors.
- */
 function parseJASCPAL(text) {
   const lines = text
     .replace(/^\uFEFF/, '') // Remove BOM if present
@@ -61,9 +58,6 @@ function parseJASCPAL(text) {
   });
 }
 
-/**
- * Parses Paint.NET TXT palette format and returns an array of hex colors.
- */
 function parsePaintNetTXT(text) {
   const lines = text
     .replace(/^\uFEFF/, '') // Remove BOM if present
@@ -85,9 +79,6 @@ function parsePaintNetTXT(text) {
   return lines.slice(0, MAX_PALETTE_COLORS).map((line) => `#${line.slice(2)}`); // Skip 'FF' alpha
 }
 
-/**
- * Parses GIMP GPL palette format and returns an array of hex colors.
- */
 function parseGimpGPL(text) {
   const lines = text
     .replace(/^\uFEFF/, '') // Remove BOM if present
@@ -112,6 +103,88 @@ function parseGimpGPL(text) {
     }
   }
   return hexColors;
+}
+
+function parseASE(arrayBuffer) {
+  const view = new DataView(arrayBuffer);
+  let offset = 0;
+
+  const readUint16 = () => {
+    const v = view.getUint16(offset, false);
+    offset += 2;
+    return v;
+  };
+  const readUint32 = () => {
+    const v = view.getUint32(offset, false);
+    offset += 4;
+    return v;
+  };
+
+  const readString = (length) => {
+    const str = [];
+    for (let i = 0; i < length; i++) {
+      str.push(String.fromCharCode(view.getUint16(offset, false)));
+      offset += 2;
+    }
+    return str.join('').replace(/\0/g, '');
+  };
+
+  const signature = String.fromCharCode(
+    view.getUint8(0),
+    view.getUint8(1),
+    view.getUint8(2),
+    view.getUint8(3)
+  );
+  if (signature !== 'ASEF') throw new Error('Not an ASE file');
+
+  offset = 4;
+  offset += 4; // skip versionMajor + versionMinor
+  const numBlocks = readUint32();
+
+  const colors = [];
+
+  for (let i = 0; i < numBlocks; i++) {
+    const blockType = readUint16();
+    const blockLength = readUint32();
+
+    if (blockType === 0x0001) {
+      // COLOR_ENTRY
+      const nameLength = readUint16();
+      offset += nameLength * 2; // skip color name
+
+      const colorModel = String.fromCharCode(
+        view.getUint8(offset++),
+        view.getUint8(offset++),
+        view.getUint8(offset++),
+        view.getUint8(offset++)
+      );
+
+      if (colorModel === 'RGB ') {
+        const r = view.getFloat32(offset, false);
+        offset += 4;
+        const g = view.getFloat32(offset, false);
+        offset += 4;
+        const b = view.getFloat32(offset, false);
+        offset += 4;
+
+        const hex = `#${[r, g, b]
+          .map((v) =>
+            Math.round(v * 255)
+              .toString(16)
+              .padStart(2, '0')
+          )
+          .join('')}`;
+
+        colors.push(hex);
+      }
+
+      offset += 2; // skip color type
+    } else {
+      offset += blockLength; // skip unknown block
+    }
+  }
+
+  return colors.slice(0, MAX_PALETTE_COLORS);
 }
 
 /**
@@ -170,17 +243,20 @@ export async function loadBuiltInPalette(paletteKey, selectedColorRef) {
 export function loadPaletteFromFile(file, selectedColorRef) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
+    const ext = file.name.toLowerCase().split('.').pop();
+
     reader.onload = () => {
       try {
-        const text = reader.result;
         let hexColors;
 
-        if (file.name.toLowerCase().endsWith('.pal')) {
-          hexColors = parseJASCPAL(text);
-        } else if (file.name.toLowerCase().endsWith('.txt')) {
-          hexColors = parsePaintNetTXT(text);
-        } else if (file.name.toLowerCase().endsWith('.gpl')) {
-          hexColors = parseGimpGPL(text);
+        if (ext === 'pal') {
+          hexColors = parseJASCPAL(reader.result);
+        } else if (ext === 'txt') {
+          hexColors = parsePaintNetTXT(reader.result);
+        } else if (ext === 'gpl') {
+          hexColors = parseGimpGPL(reader.result);
+        } else if (ext === 'ase') {
+          hexColors = parseASE(reader.result);
         } else {
           throw new Error('Unsupported palette format');
         }
@@ -205,6 +281,10 @@ export function loadPaletteFromFile(file, selectedColorRef) {
       reject(reader.error);
     };
 
-    reader.readAsText(file);
+    if (ext === 'ase') {
+      reader.readAsArrayBuffer(file);
+    } else {
+      reader.readAsText(file);
+    }
   });
 }
