@@ -187,6 +187,20 @@ function parseASE(arrayBuffer) {
   return colors.slice(0, MAX_PALETTE_COLORS);
 }
 
+function parseHEX(text) {
+  const lines = text
+    .replace(/^\uFEFF/, '') // Remove BOM if present
+    .trim()
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => /^[0-9a-fA-F]{6}$/.test(line)); // Keep only valid 6-digit hex codes
+
+  if (lines.length === 0)
+    throw new Error('No valid hex colors found in HEX file');
+
+  return lines.slice(0, MAX_PALETTE_COLORS).map((hex) => `#${hex}`);
+}
+
 /**
  * Renders color swatches into the #colorPalettePanel and attaches click events
  * to update selectedColorRef when a swatch is clicked.
@@ -257,6 +271,8 @@ export function loadPaletteFromFile(file, selectedColorRef) {
           hexColors = parseGimpGPL(reader.result);
         } else if (ext === 'ase') {
           hexColors = parseASE(reader.result);
+        } else if (ext === 'hex') {
+          hexColors = parseHEX(reader.result);
         } else {
           throw new Error('Unsupported palette format');
         }
