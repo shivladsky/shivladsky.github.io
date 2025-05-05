@@ -42,7 +42,6 @@ export const BuiltInPalettes = {
 
 /**
  * Parses JASC-PAL formatted text and returns an array of hex colors.
- * Loads a maximum of 128 colors.
  */
 function parseJASCPAL(text) {
   const lines = text
@@ -84,6 +83,35 @@ function parsePaintNetTXT(text) {
   });
 
   return lines.slice(0, MAX_PALETTE_COLORS).map((line) => `#${line.slice(2)}`); // Skip 'FF' alpha
+}
+
+/**
+ * Parses GIMP GPL palette format and returns an array of hex colors.
+ */
+function parseGimpGPL(text) {
+  const lines = text
+    .replace(/^\uFEFF/, '') // Remove BOM if present
+    .trim()
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(
+      (line) => line && !line.startsWith('#') && !/^GIMP Palette/i.test(line)
+    );
+
+  const hexColors = [];
+  for (const line of lines) {
+    const parts = line.split(/\s+/);
+    if (parts.length >= 3) {
+      const [r, g, b] = parts.slice(0, 3).map(Number);
+      if ([r, g, b].every((v) => !isNaN(v))) {
+        hexColors.push(
+          `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`
+        );
+        if (hexColors.length >= MAX_PALETTE_COLORS) break;
+      }
+    }
+  }
+  return hexColors;
 }
 
 /**
@@ -151,6 +179,8 @@ export function loadPaletteFromFile(file, selectedColorRef) {
           hexColors = parseJASCPAL(text);
         } else if (file.name.toLowerCase().endsWith('.txt')) {
           hexColors = parsePaintNetTXT(text);
+        } else if (file.name.toLowerCase().endsWith('.gpl')) {
+          hexColors = parseGimpGPL(text);
         } else {
           throw new Error('Unsupported palette format');
         }
