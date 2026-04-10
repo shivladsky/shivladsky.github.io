@@ -1,10 +1,43 @@
 import { flashMenuLabel } from './menubar.mjs';
 
-const keyState = new Set();
+const modifierState = {
+  isShiftHeld: false,
+  isEraseModifierHeld: false,
+};
+
+function dispatchModifierState() {
+  document.dispatchEvent(
+    new CustomEvent('keyboardModifiersChanged', {
+      detail: { ...modifierState },
+    })
+  );
+}
+
+function updateModifierState(event) {
+  const isKeyDown = event.type === 'keydown';
+  const isShiftEvent = event.key === 'Shift';
+  const isEraseModifierEvent = event.key === 'Meta' || event.key === 'Control';
+
+  const nextShiftHeld = isShiftEvent ? isKeyDown : event.shiftKey;
+  const nextEraseModifierHeld = isEraseModifierEvent
+    ? isKeyDown
+    : event.metaKey || event.ctrlKey;
+
+  if (
+    modifierState.isShiftHeld === nextShiftHeld &&
+    modifierState.isEraseModifierHeld === nextEraseModifierHeld
+  ) {
+    return;
+  }
+
+  modifierState.isShiftHeld = nextShiftHeld;
+  modifierState.isEraseModifierHeld = nextEraseModifierHeld;
+  dispatchModifierState();
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', (e) => {
-    keyState.add(e.key);
+    updateModifierState(e);
 
     const isCmdOrCtrl = e.metaKey || e.ctrlKey;
     const key = e.key.toLowerCase();
@@ -92,6 +125,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.addEventListener('keyup', (e) => {
-    keyState.delete(e.key);
+    updateModifierState(e);
   });
+
+  window.addEventListener('blur', () => {
+    if (!modifierState.isShiftHeld && !modifierState.isEraseModifierHeld) return;
+
+    modifierState.isShiftHeld = false;
+    modifierState.isEraseModifierHeld = false;
+    dispatchModifierState();
+  });
+
+  dispatchModifierState();
 });

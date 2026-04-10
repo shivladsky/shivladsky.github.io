@@ -12,6 +12,42 @@ export function flashMenuLabel(menuId) {
   });
 }
 
+function syncDropdownCheckmarks(dropdown) {
+  const anyChecked = dropdown.querySelector('.dropdown-item.checked');
+  dropdown.classList.toggle('with-checks', !!anyChecked);
+}
+
+function updateDropdownMinWidth(dropdown, extraWidth = 0) {
+  dropdown.style.minWidth = 'auto';
+
+  let maxWidth = 0;
+  dropdown.querySelectorAll('.dropdown-item').forEach((item) => {
+    item.style.minWidth = 'auto';
+    maxWidth = Math.max(maxWidth, item.offsetWidth);
+  });
+
+  dropdown.style.minWidth = `${maxWidth + extraWidth}px`;
+}
+
+function measureDropdownMinWidth(dropdown, extraWidth = 0) {
+  const originalDisplay = dropdown.style.display;
+  const originalVisibility = dropdown.style.visibility;
+  const originalPosition = dropdown.style.position;
+  const originalLeft = dropdown.style.left;
+
+  dropdown.style.visibility = 'hidden';
+  dropdown.style.display = 'block';
+  dropdown.style.position = 'absolute';
+  dropdown.style.left = '-9999px';
+
+  updateDropdownMinWidth(dropdown, extraWidth);
+
+  dropdown.style.display = originalDisplay;
+  dropdown.style.visibility = originalVisibility;
+  dropdown.style.position = originalPosition;
+  dropdown.style.left = originalLeft;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const menuLabels = document.querySelectorAll('.menu-label');
   let menuActive = false;
@@ -28,34 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ensure dropdown is wide enough for its longest item
     if (dropdown && dropdown.classList.contains('dropdown')) {
-      // Check if any items are .checked
-      const hasChecks = !!dropdown.querySelector('.dropdown-item.checked');
-      dropdown.classList.toggle('with-checks', hasChecks);
-
-      // Temporarily reveal dropdown for measurement
-      const originalDisplay = dropdown.style.display;
-      const originalVisibility = dropdown.style.visibility;
-      const originalPosition = dropdown.style.position;
-      const originalLeft = dropdown.style.left;
-
-      dropdown.style.visibility = 'hidden';
-      dropdown.style.display = 'block';
-      dropdown.style.position = 'absolute';
-      dropdown.style.left = '-9999px';
-
-      let maxWidth = 0;
-      dropdown.querySelectorAll('.dropdown-item').forEach((item) => {
-        maxWidth = Math.max(maxWidth, item.offsetWidth);
-      });
-
-      // Reset to original styles
-      dropdown.style.display = originalDisplay;
-      dropdown.style.visibility = originalVisibility;
-      dropdown.style.position = originalPosition;
-      dropdown.style.left = originalLeft;
-
-      // Apply computed width
-      dropdown.style.minWidth = `${maxWidth + 32}px`;
+      syncDropdownCheckmarks(dropdown);
+      measureDropdownMinWidth(dropdown, 32);
     }
 
     // Click to open/close and activate menu bar mode
@@ -162,23 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropdown = menuItem.closest('.dropdown');
     if (!dropdown) return;
 
-    const anyChecked = dropdown.querySelector('.dropdown-item.checked');
-    dropdown.classList.toggle('with-checks', !!anyChecked);
-
-    // Recalculate dropdown minWidth if checkmark state has changed
-    const dropdownItems = Array.from(
-      dropdown.querySelectorAll('.dropdown-item')
-    );
-    // Reset dropdown width first to avoid cumulative growth
-    dropdown.style.minWidth = 'auto';
-
-    let maxWidth = 0;
-    dropdownItems.forEach((item) => {
-      item.style.minWidth = 'auto'; // Also reset individual items just in case
-      maxWidth = Math.max(maxWidth, item.offsetWidth);
-    });
-
-    dropdown.style.minWidth = `${maxWidth}px`;
+    syncDropdownCheckmarks(dropdown);
+    updateDropdownMinWidth(dropdown);
   });
 
   // Dynamically build the Palette menu dropdown
@@ -249,16 +244,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update dropdown width (optional polish)
     const dropdown = menuItem ? menuItem.closest('.dropdown') : null;
     if (dropdown) {
-      const anyChecked = dropdown.querySelector('.dropdown-item.checked');
-      dropdown.classList.toggle('with-checks', !!anyChecked);
-
-      dropdown.style.minWidth = 'auto';
-      let maxWidth = 0;
-      dropdown.querySelectorAll('.dropdown-item').forEach((item) => {
-        item.style.minWidth = 'auto';
-        maxWidth = Math.max(maxWidth, item.offsetWidth);
-      });
-      dropdown.style.minWidth = `${maxWidth}px`;
+      syncDropdownCheckmarks(dropdown);
+      updateDropdownMinWidth(dropdown);
     }
   });
 

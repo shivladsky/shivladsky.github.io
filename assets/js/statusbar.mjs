@@ -67,42 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
     renderStatusBar();
   });
 
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Shift' && !statusState.isShiftHeld) {
-      statusState.isShiftHeld = true;
-      renderStatusBar();
-      return;
-    }
-
-    if (
-      (event.key === 'Meta' || event.key === 'Control') &&
-      !statusState.isEraseModifierHeld
-    ) {
-      statusState.isEraseModifierHeld = true;
-      renderStatusBar();
-    }
-  });
-
-  document.addEventListener('keyup', (event) => {
-    if (event.key === 'Shift' && statusState.isShiftHeld) {
-      statusState.isShiftHeld = false;
-      renderStatusBar();
-      return;
-    }
-
-    if (
-      (event.key === 'Meta' || event.key === 'Control') &&
-      statusState.isEraseModifierHeld
-    ) {
-      statusState.isEraseModifierHeld = false;
-      renderStatusBar();
-    }
-  });
-
-  window.addEventListener('blur', () => {
-    if (!statusState.isShiftHeld && !statusState.isEraseModifierHeld) return;
-    statusState.isShiftHeld = false;
-    statusState.isEraseModifierHeld = false;
+  document.addEventListener('keyboardModifiersChanged', (event) => {
+    const { isShiftHeld, isEraseModifierHeld } = event.detail;
+    statusState.isShiftHeld = isShiftHeld;
+    statusState.isEraseModifierHeld = isEraseModifierHeld;
     renderStatusBar();
   });
 
