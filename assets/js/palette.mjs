@@ -30,6 +30,10 @@ export const BuiltInPalettes = {
     name: 'Apollo',
     path: './assets/data/apollo.pal',
   },
+  nesWikipedia: {
+    name: 'NES (Wikipedia)',
+    path: './assets/data/nes-wikipedia.pal',
+  },
   endesga64: {
     name: 'Endesga 64',
     path: './assets/data/endesga-64.pal',
