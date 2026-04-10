@@ -71,7 +71,20 @@
       </div>
     </div>
 
-  </div>
+    <div id="statusBar" aria-live="polite">
+      <span class="status-item">
+        <span class="status-label">Grid:</span>
+        <span id="gridStatusText">Visible</span>
+      </span>
+      <span class="status-item">
+        <span class="status-label">Tool:</span>
+        <span id="selectedToolText">Paint</span>
+      </span>
+      <span class="status-item" id="selectedModeStatus" hidden>
+        <span class="status-label">Mode:</span>
+        <span id="selectedModeText"></span>
+      </span>
+    </div>
 
     <div id="colorPalettePanel"></div>
     <input type="file" id="paletteFileInput" accept=".pal,.txt,.gpl,.ase,.hex" style="display: none;" />

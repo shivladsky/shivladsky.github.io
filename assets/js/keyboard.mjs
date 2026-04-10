@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- XRAY & GRID ---
-    else if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'r') {
+    else if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'x') {
       window.VoxPaint.toggleXrayMode();
       flashMenuLabel('viewMenu');
       e.preventDefault();
