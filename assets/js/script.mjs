@@ -43,6 +43,7 @@ camera.lookAt(0, 0, 0);
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
+mouse.set(2, 2);
 
 // Dot params
 const resolution = 10; // mm
@@ -98,13 +99,43 @@ updateLayerVisibility();
 
 let hovered = null;
 let isLeftMouseDown = false;
+let isPointerInCanvas = false;
 
 // Mouse drag rotate logic
 let dragButton = null;
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 
+function updateMouseFromEvent(e) {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+}
+
+function clearHoveredVoxel() {
+  if (!hovered) return;
+
+  const coord = hovered.userData.coord;
+  const isFilled = voxelData.has(coord);
+  const color = isFilled ? voxelData.get(coord) : COLORS.base;
+
+  if (!isFilled) {
+    hovered.material = baseMaterial;
+  }
+
+  hovered.material.color.set(color);
+  hovered.scale.set(
+    voxelSize * (isFilled ? 1.0 : 0.5),
+    voxelSize * (isFilled ? 1.0 : 0.5),
+    1
+  );
+
+  hovered = null;
+}
+
 function onMouseDown(e) {
+  isPointerInCanvas = true;
+  updateMouseFromEvent(e);
+
   if (e.button === 2) {
     // Right-click for rotation
     isDragging = true;
@@ -124,8 +155,8 @@ function onMouseDown(e) {
 }
 
 function onMouseMove(e) {
-  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  isPointerInCanvas = true;
+  updateMouseFromEvent(e);
 
   if (isLeftMouseDown) {
     tryPaintVoxel(e);
@@ -144,6 +175,13 @@ function onMouseUp() {
   undoManager.endStroke();
   isDragging = false;
   isLeftMouseDown = false;
+}
+
+function onMouseLeave() {
+  onMouseUp();
+  isPointerInCanvas = false;
+  mouse.set(2, 2);
+  clearHoveredVoxel();
 }
 
 function tryPaintVoxel(e) {
@@ -411,41 +449,25 @@ function updateVoxelVisibility() {
 function animate() {
   requestAnimationFrame(animate);
 
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster
-    .intersectObjects(dots, false)
-    .filter((obj) => obj.object.visible);
+  clearHoveredVoxel();
 
-  if (hovered) {
-    const coord = hovered.userData.coord;
-    const isFilled = voxelData.has(coord);
-    const color = isFilled ? voxelData.get(coord) : COLORS.base;
+  if (isPointerInCanvas) {
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster
+      .intersectObjects(dots, false)
+      .filter((obj) => obj.object.visible);
 
-    // If it's empty, reset to shared base material
-    if (!isFilled) {
-      hovered.material = baseMaterial;
+    if (intersects.length > 0) {
+      hovered = intersects[0].object;
+
+      // Prevent shared base material from being mutated
+      if (hovered.material === baseMaterial) {
+        hovered.material = hovered.material.clone();
+      }
+
+      hovered.material.color.set(COLORS.hover);
+      hovered.scale.set(voxelSize, voxelSize, 1);
     }
-
-    hovered.material.color.set(color);
-    hovered.scale.set(
-      voxelSize * (isFilled ? 1.0 : 0.5),
-      voxelSize * (isFilled ? 1.0 : 0.5),
-      1
-    );
-
-    hovered = null;
-  }
-
-  if (intersects.length > 0) {
-    hovered = intersects[0].object;
-
-    // Prevent shared base material from being mutated
-    if (hovered.material === baseMaterial) {
-      hovered.material = hovered.material.clone();
-    }
-
-    hovered.material.color.set(COLORS.hover);
-    hovered.scale.set(voxelSize, voxelSize, 1);
   }
 
   updateVoxelVisibility(); // Real-time visibility update
@@ -635,7 +657,7 @@ async function exportModel() {
 canvas.addEventListener('mousedown', onMouseDown);
 canvas.addEventListener('mousemove', onMouseMove);
 canvas.addEventListener('mouseup', onMouseUp);
-canvas.addEventListener('mouseleave', onMouseUp);
+canvas.addEventListener('mouseleave', onMouseLeave);
 
 // --- TRACKPAD/TOUCH CONTROLS ---
 canvas.addEventListener(
