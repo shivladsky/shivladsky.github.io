@@ -187,13 +187,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     paletteDropdown.innerHTML = ''; // Clear
     Object.entries(BuiltInPalettes).forEach(([key, { name }]) => {
-      const a = document.createElement('a');
-      a.href = '#';
-      a.className = 'dropdown-item';
-      a.id = `palette-${key}`; // id like palette-dawnbringer32
-      a.dataset.palette = key;
-      a.textContent = name;
-      paletteDropdown.appendChild(a);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'dropdown-item';
+      button.id = `palette-${key}`; // id like palette-dawnbringer32
+      button.dataset.palette = key;
+      button.textContent = name;
+      paletteDropdown.appendChild(button);
     });
 
     // Add back reserved items

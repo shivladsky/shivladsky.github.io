@@ -83,6 +83,12 @@ canvas {
   color: #ededed;
   text-decoration: none;
   pointer-events: auto;
+  background: none;
+  border: 0;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  margin: 0;
   padding: 8px 16px;
   display: inline-block;
   outline: none;
@@ -130,8 +136,16 @@ canvas {
   font-size: 36px;
   color: #ededed;
   text-decoration: none;
+  font-family: inherit;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  margin: 0;
   padding: 8px 16px;
   display: block;
+  width: 100%;
+  box-sizing: border-box;
   position: relative;
   white-space: nowrap;
 }
