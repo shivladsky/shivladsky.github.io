@@ -48,17 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!window.VoxPaint.isPaintMode()) {
         window.VoxPaint.setToolMode('paint');
       }
-      flashMenuLabel('toolsMenu');
-    }
-
-    if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'o') {
-      window.VoxPaint.toggleOverpaintMode();
-      flashMenuLabel('toolsMenu');
       e.preventDefault();
+      flashMenuLabel('toolsMenu');
       return;
     }
 
-    if (key === 'f') {
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'f') {
       window.VoxPaint.toggleFillMode();
       flashMenuLabel('toolsMenu');
       e.preventDefault();

@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .classList.toggle('disabled', !canGoDown);
   });
 
-  // Handle mode changes (xray, grid, overpaint, fill)
+  // Handle mode changes (xray, grid, paint, fill)
   document.addEventListener('modeChanged', (event) => {
     const { mode, value } = event.detail;
 
@@ -157,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
       xray: 'toggleXray',
       grid: 'toggleGrid',
       paint: 'togglePaint',
-      overpaint: 'toggleOverpaint',
       fill: 'toggleFill',
     };
 
@@ -335,11 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('togglePaint').addEventListener('click', (e) => {
     e.preventDefault();
     window.VoxPaint.setToolMode('paint');
-  });
-
-  document.getElementById('toggleOverpaint').addEventListener('click', (e) => {
-    e.preventDefault();
-    window.VoxPaint.toggleOverpaintMode();
   });
 
   document.getElementById('toggleFill').addEventListener('click', (e) => {

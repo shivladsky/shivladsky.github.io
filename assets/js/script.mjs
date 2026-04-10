@@ -64,7 +64,6 @@ scene.add(voxelGroup);
 let visibleLayerCount = 1;
 let xrayMode = false;
 let fillMode = false;
-let overpaintMode = false;
 
 // Create all dots
 const dots = [];
@@ -185,6 +184,8 @@ function onMouseLeave() {
 }
 
 function tryPaintVoxel(e) {
+  if (fillMode) return false;
+
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster
     .intersectObjects(dots, false)
@@ -197,8 +198,9 @@ function tryPaintVoxel(e) {
 
   // Determine if we're in deletion (erase) mode.
   const isDeleteMode = e && (e.ctrlKey || e.metaKey);
+  const isOverpaintModifierHeld = e && e.shiftKey;
 
-  const isPaintable = overpaintMode || !voxelData.has(coord);
+  const isPaintable = isOverpaintModifierHeld || !voxelData.has(coord);
   if (!isDeleteMode && !isPaintable) return false;
 
   const oldColor = voxelData.get(coord) || COLORS.base;
@@ -490,14 +492,6 @@ function dispatchModeChanged(mode, value) {
       detail: { mode, value },
     })
   );
-
-  // Paint is implicit — update its menu state as complement of Fill and Overpaint
-  const isPaint = !overpaintMode && !fillMode;
-  document.dispatchEvent(
-    new CustomEvent('modeChanged', {
-      detail: { mode: 'paint', value: isPaint },
-    })
-  );
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -558,63 +552,27 @@ function toggleGridVisibility() {
 }
 
 function setToolMode(mode) {
-  // Valid modes: 'paint', 'overpaint', 'fill'
+  // Valid modes: 'paint', 'fill'
 
   // Do nothing if the tool is already active
-  if (
-    (mode === 'paint' && !overpaintMode && !fillMode) ||
-    (mode === 'overpaint' && overpaintMode) ||
-    (mode === 'fill' && fillMode)
-  ) {
+  if ((mode === 'paint' && !fillMode) || (mode === 'fill' && fillMode)) {
     return;
   }
 
-  const wasOverpaint = overpaintMode;
   const wasFill = fillMode;
+  fillMode = mode === 'fill';
 
-  // Reset all
-  overpaintMode = false;
-  fillMode = false;
-
-  if (mode === 'overpaint') {
-    overpaintMode = true;
-  } else if (mode === 'fill') {
-    fillMode = true;
-  }
-
-  // Only dispatch events if the state actually changed
-  if (wasOverpaint !== overpaintMode) {
-    dispatchModeChanged('overpaint', overpaintMode);
-  }
   if (wasFill !== fillMode) {
     dispatchModeChanged('fill', fillMode);
   }
 
-  // Implicitly update paint status
-  const isPaint = !overpaintMode && !fillMode;
-  dispatchModeChanged('paint', isPaint);
-}
-
-function toggleOverpaintMode() {
-  overpaintMode = !overpaintMode;
-
-  if (overpaintMode && fillMode) {
-    fillMode = false;
-    dispatchModeChanged('fill', fillMode);
-  }
-
-  dispatchModeChanged('overpaint', overpaintMode);
+  dispatchModeChanged('paint', !fillMode);
 }
 
 function toggleFillMode() {
   fillMode = !fillMode;
-
-  if (fillMode && overpaintMode) {
-    overpaintMode = false;
-    dispatchModeChanged('overpaint', overpaintMode);
-  }
-
   dispatchModeChanged('fill', fillMode);
+  dispatchModeChanged('paint', !fillMode);
 }
 
 // --- Model Import/Export ---
@@ -690,11 +648,9 @@ window.VoxPaint = {
   jumpToBottomLayer,
   toggleXrayMode,
   toggleGridVisibility,
-  toggleOverpaintMode,
   toggleFillMode,
   setToolMode,
-  isPaintMode: () => !overpaintMode && !fillMode,
-  isOverpaintMode: () => overpaintMode,
+  isPaintMode: () => !fillMode,
   isFillMode: () => fillMode,
 };
 

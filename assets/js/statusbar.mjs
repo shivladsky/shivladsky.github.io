@@ -1,6 +1,5 @@
 const TOOL_LABELS = {
   paint: 'Paint',
-  overpaint: 'Overpaint',
   fill: 'Fill',
 };
 
@@ -29,9 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (selectedToolText) {
       selectedToolText.textContent =
-        (statusState.tool === 'paint' || statusState.tool === 'overpaint') &&
-        statusState.isEraseModifierHeld
+        statusState.tool === 'paint' && statusState.isEraseModifierHeld
           ? 'Erase'
+          : statusState.tool === 'paint' && statusState.isShiftHeld
+            ? 'Overpaint'
           : statusState.tool === 'fill' && statusState.isShiftHeld
             ? 'Megafill'
             : TOOL_LABELS[statusState.tool] || 'Paint';
