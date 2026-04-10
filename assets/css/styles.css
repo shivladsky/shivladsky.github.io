@@ -105,6 +105,7 @@ canvas {
   text-decoration: none;
   padding: 8px 16px;
   display: block;
+  position: relative;
   white-space: nowrap;
 }
 
@@ -138,17 +139,12 @@ canvas {
   visibility: visible;
 }
 
-.dropdown.with-checks .dropdown-item {
-  padding-left: 28px;
-  position: relative;
-}
-
 /* Dynamically injected checkmark span */
 .dropdown-item::before {
   content: '';
   position: absolute;
-  left: 8px;
-  width: 20px;
+  left: 2px;
+  width: 12px;
   text-align: center;
   color: currentColor;
   visibility: hidden;
