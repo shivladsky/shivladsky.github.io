@@ -43,7 +43,7 @@ canvas {
   align-items: center;
   padding: 0 16px;
   box-sizing: border-box;
-  z-index: 10;
+  z-index: 20;
 }
 
 #statusBar {
@@ -56,7 +56,7 @@ canvas {
   gap: 2px;
   padding: 0;
   box-sizing: border-box;
-  z-index: 11;
+  z-index: 10;
   pointer-events: none;
 }
 
@@ -111,12 +111,14 @@ canvas {
   position: absolute;
   top: 100%;
   left: 0;
-  background-color: black;
+  background-color: #000;
+  border: 1px solid #000;
   display: none;
   flex-direction: column;
   min-width: 100px;
+  overflow: hidden;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 20;
+  z-index: 30;
 }
 
 .dropdown.show {
