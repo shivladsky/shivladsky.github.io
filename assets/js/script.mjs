@@ -4,7 +4,7 @@ import * as Palette from './palette.mjs';
 import { UndoManager } from './undo.mjs';
 
 /**
- * Core UI built-in colour roles for VoxPaint.
+ * Core UI built-in colour roles for Volumetrik.
  * These three are guaranteed defaults:
  *   • base   – the immutable empty voxel colour - never changes
  *   • hover  – the immutable highlight colour on mouseover - never changes
@@ -24,7 +24,7 @@ const COLORS = {
 const selectedColorRef = { value: COLORS.active };
 window.selectedColorRef = selectedColorRef;
 
-// VoxPaint Starter - 16x16x16cm cube with 10mm points
+// Volumetrik Starter - 16x16x16cm cube with 10mm points
 const canvas = document.getElementById('viewportCanvas');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -587,9 +587,9 @@ function resetModel() {
   );
 
   // Reset UI
-  if (xrayMode) VoxPaint.toggleXrayMode();
-  if (!showEmptyVoxels) VoxPaint.toggleGridVisibility();
-  VoxPaint.jumpToBottomLayer();
+  if (xrayMode) Volumetrik.toggleXrayMode();
+  if (!showEmptyVoxels) Volumetrik.toggleGridVisibility();
+  Volumetrik.jumpToBottomLayer();
 }
 
 function importModel() {
@@ -601,8 +601,8 @@ function importModel() {
     undoManager,
     updateVoxelVisibility,
     () => {
-      VoxPaint.jumpToTopLayer();
-      if (showEmptyVoxels) VoxPaint.toggleGridVisibility();
+      Volumetrik.jumpToTopLayer();
+      if (showEmptyVoxels) Volumetrik.toggleGridVisibility();
     }
   );
 }
@@ -636,7 +636,7 @@ canvas.addEventListener(
 );
 
 // --- Export global controls ---
-window.VoxPaint = {
+window.Volumetrik = {
   resetModel,
   importModel,
   exportModel,

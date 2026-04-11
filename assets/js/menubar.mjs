@@ -266,58 +266,58 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- FILE MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('newFile').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.resetModel();
+    window.Volumetrik.resetModel();
   });
 
   document.getElementById('openFile').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.importModel();
+    window.Volumetrik.importModel();
   });
 
   document.getElementById('saveFile').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.exportModel();
+    window.Volumetrik.exportModel();
   });
 
   // --- EDIT MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('undoAction').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.handleUndo();
+    window.Volumetrik.handleUndo();
   });
   document.getElementById('redoAction').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.handleRedo();
+    window.Volumetrik.handleRedo();
   });
 
   // --- VIEW MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('upOneLayer').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.increaseVisibleLayers();
+    window.Volumetrik.increaseVisibleLayers();
   });
 
   document.getElementById('downOneLayer').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.decreaseVisibleLayers();
+    window.Volumetrik.decreaseVisibleLayers();
   });
 
   document.getElementById('jumpToTop').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.jumpToTopLayer();
+    window.Volumetrik.jumpToTopLayer();
   });
 
   document.getElementById('jumpToBottom').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.jumpToBottomLayer();
+    window.Volumetrik.jumpToBottomLayer();
   });
 
   document.getElementById('toggleXray').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.toggleXrayMode();
+    window.Volumetrik.toggleXrayMode();
   });
 
   document.getElementById('toggleGrid').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.toggleGridVisibility();
+    window.Volumetrik.toggleGridVisibility();
   });
 
   // --- PALETTE MENU DROPDOWN ITEM CLICKS ---
@@ -333,11 +333,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- TOOLS MENU DROPDOWN ITEM CLICKS ---
   document.getElementById('togglePaint').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.setToolMode('paint');
+    window.Volumetrik.setToolMode('paint');
   });
 
   document.getElementById('toggleFill').addEventListener('click', (e) => {
     e.preventDefault();
-    window.VoxPaint.toggleFillMode();
+    window.Volumetrik.toggleFillMode();
   });
 });

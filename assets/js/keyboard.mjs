@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- TOGGLE MODES ---
     if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'p') {
-      if (!window.VoxPaint.isPaintMode()) {
-        window.VoxPaint.setToolMode('paint');
+      if (!window.Volumetrik.isPaintMode()) {
+        window.Volumetrik.setToolMode('paint');
       }
       e.preventDefault();
       flashMenuLabel('toolsMenu');
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'f') {
-      window.VoxPaint.toggleFillMode();
+      window.Volumetrik.toggleFillMode();
       flashMenuLabel('toolsMenu');
       e.preventDefault();
       return;
@@ -62,30 +62,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- LAYER CONTROLS ---
     if (isShift && key === 'q') {
-      window.VoxPaint.jumpToBottomLayer();
+      window.Volumetrik.jumpToBottomLayer();
       flashMenuLabel('viewMenu');
       e.preventDefault();
     } else if (isShift && key === 'e') {
-      window.VoxPaint.jumpToTopLayer();
+      window.Volumetrik.jumpToTopLayer();
       flashMenuLabel('viewMenu');
       e.preventDefault();
     } else if (!isShift && key === 'q') {
-      window.VoxPaint.decreaseVisibleLayers();
+      window.Volumetrik.decreaseVisibleLayers();
       flashMenuLabel('viewMenu');
       e.preventDefault();
     } else if (!isShift && key === 'e') {
-      window.VoxPaint.increaseVisibleLayers();
+      window.Volumetrik.increaseVisibleLayers();
       flashMenuLabel('viewMenu');
       e.preventDefault();
     }
 
     // --- XRAY & GRID ---
     else if (!e.ctrlKey && !e.metaKey && !e.altKey && key === 'x') {
-      window.VoxPaint.toggleXrayMode();
+      window.Volumetrik.toggleXrayMode();
       flashMenuLabel('viewMenu');
       e.preventDefault();
     } else if (key === 'tab') {
-      window.VoxPaint.toggleGridVisibility();
+      window.Volumetrik.toggleGridVisibility();
       flashMenuLabel('viewMenu');
       e.preventDefault();
     }
@@ -95,14 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
       (e.metaKey && e.shiftKey && key === 'z') || // Cmd+Shift+Z → Redo (Mac)
       (e.ctrlKey && key === 'y') // Ctrl+Y → Redo (Win)
     ) {
-      window.VoxPaint.handleRedo();
+      window.Volumetrik.handleRedo();
       flashMenuLabel('editMenu');
       e.preventDefault();
     } else if (
       (e.metaKey && key === 'z') || // Cmd+Z → Undo (Mac)
       (e.ctrlKey && key === 'z') // Ctrl+Z → Undo (Win)
     ) {
-      window.VoxPaint.handleUndo();
+      window.Volumetrik.handleUndo();
       flashMenuLabel('editMenu');
       e.preventDefault();
     }
@@ -110,11 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FILE SHORTCUTS ---
     else if (isCmdOrCtrl && key === 'o') {
       e.preventDefault();
-      window.VoxPaint.importModel();
+      window.Volumetrik.importModel();
       flashMenuLabel('fileMenu');
     } else if (isCmdOrCtrl && key === 's') {
       e.preventDefault();
-      window.VoxPaint.exportModel();
+      window.Volumetrik.exportModel();
       flashMenuLabel('fileMenu');
     }
   });

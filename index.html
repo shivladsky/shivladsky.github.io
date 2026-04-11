@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VoxPaint</title>
+    <title>Volumetrik</title>
     <link rel="icon" href="data:," />
     <link
       href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
@@ -14,12 +14,12 @@
   <body>
     <!-- Basic pageview tracking -->
     <script type="module">
-      (async()=>{try{await fetch("https://shivlogger.shivladsky.workers.dev",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"pageview",event_source:"voxpaint",timestamp:Math.floor(Date.now()/1e3),nonce:crypto.randomUUID(),url:location.href,user_agent:navigator.userAgent,referrer:document.referrer})})}catch(e){console.warn("Tracking failed:",e)}})();
+      (async()=>{try{await fetch("https://shivlogger.shivladsky.workers.dev",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({event:"pageview",event_source:"volumetrik",timestamp:Math.floor(Date.now()/1e3),nonce:crypto.randomUUID(),url:location.href,user_agent:navigator.userAgent,referrer:document.referrer})})}catch(e){console.warn("Tracking failed:",e)}})();
       </script>
 
     <canvas id="viewportCanvas"></canvas>
 
-    <div id="titleOverlay">VoxPaint</div>
+    <div id="titleOverlay">Volumetrik</div>
 
     <!-- Menubar (always at the top) -->
     <div id="menuBar">
