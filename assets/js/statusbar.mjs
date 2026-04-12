@@ -7,13 +7,20 @@ const MODE_LABELS = {
   xray: 'X-Ray',
 };
 
+const PRESENTATION_LABELS = {
+  '2d': '2D',
+  '3d': '3D',
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+  const renderStatusText = document.getElementById('renderStatusText');
   const gridStatusText = document.getElementById('gridStatusText');
   const selectedToolText = document.getElementById('selectedToolText');
   const selectedModeStatus = document.getElementById('selectedModeStatus');
   const selectedModeText = document.getElementById('selectedModeText');
 
   const statusState = {
+    presentationMode: '2d',
     grid: 'Visible',
     tool: 'paint',
     mode: null,
@@ -22,6 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const renderStatusBar = () => {
+    if (renderStatusText) {
+      renderStatusText.textContent =
+        PRESENTATION_LABELS[statusState.presentationMode] || '2D';
+    }
+
     if (gridStatusText) {
       gridStatusText.textContent = statusState.grid;
     }
@@ -64,6 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
       statusState.mode = value ? MODE_LABELS[mode] : null;
     }
 
+    renderStatusBar();
+  });
+
+  document.addEventListener('presentationModeChanged', (event) => {
+    const { mode } = event.detail;
+    statusState.presentationMode = mode;
     renderStatusBar();
   });
 

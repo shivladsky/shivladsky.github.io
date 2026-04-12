@@ -51,7 +51,15 @@ const size = 160; // mm (16 cm)
 const pointsPerAxis = size / resolution; // 160 / 10 = 16
 
 const voxelSize = resolution / 1000; // convert mm to meters for Three.js
-const baseMaterial = new THREE.SpriteMaterial({ color: COLORS.base });
+const PRESENTATION_MODES = {
+  MODE_2D: '2d',
+  MODE_3D: '3d',
+};
+
+const squareGeometry = new THREE.PlaneGeometry(1, 1);
+const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+const tempParentQuaternion = new THREE.Quaternion();
+const tempCameraQuaternion = new THREE.Quaternion();
 
 // Sparse Voxel Octree Stub (simplified)
 const voxelData = new Map(); // key = "x,y,z", value = 1
@@ -64,20 +72,187 @@ scene.add(voxelGroup);
 let visibleLayerCount = 1;
 let xrayMode = false;
 let fillMode = false;
+let presentationMode = PRESENTATION_MODES.MODE_2D;
+
+function createPlaneMaterial(color) {
+  return new THREE.MeshBasicMaterial({
+    color,
+    side: THREE.DoubleSide,
+  });
+}
+
+function createCubeMaterial(color) {
+  return new THREE.MeshBasicMaterial({ color });
+}
+
+function createCircleMaterial(color) {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(color) },
+    },
+    vertexShader: `
+      varying vec2 vUv;
+
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uColor;
+      varying vec2 vUv;
+
+      void main() {
+        vec2 centeredUv = vUv - vec2(0.5);
+        float dist = length(centeredUv);
+        float radius = 0.5;
+        float edge = max(fwidth(dist) * 0.45, 0.0025);
+        float alpha = 1.0 - smoothstep(radius - edge, radius + edge, dist);
+
+        if (alpha <= 0.0) {
+          discard;
+        }
+
+        gl_FragColor = vec4(uColor, alpha);
+      }
+    `,
+    transparent: true,
+    side: THREE.DoubleSide,
+  });
+}
+
+function getVoxelColor(coord) {
+  return voxelData.get(coord) || COLORS.base;
+}
+
+function isFilledVoxel(dot) {
+  return voxelData.has(dot.userData.coord);
+}
+
+function getVoxelShape(dot) {
+  const isFilled = isFilledVoxel(dot);
+
+  if (presentationMode === PRESENTATION_MODES.MODE_3D) {
+    return isFilled ? 'cube' : 'circle';
+  }
+
+  return 'plane';
+}
+
+function getGeometryForShape(shape) {
+  if (shape === 'cube') return cubeGeometry;
+  return squareGeometry;
+}
+
+function setMaterialColor(material, color) {
+  if (material.uniforms?.uColor) {
+    material.uniforms.uColor.value.set(color);
+    return;
+  }
+
+  material.color.set(color);
+}
+
+function getMaterialFactory(shape) {
+  if (shape === 'cube') return createCubeMaterial;
+  if (shape === 'circle') return createCircleMaterial;
+  return createPlaneMaterial;
+}
+
+function ensureVoxelMaterial(dot, shape) {
+  if (!dot.userData.materials[shape]) {
+    const color = getVoxelColor(dot.userData.coord);
+    dot.userData.materials[shape] = getMaterialFactory(shape)(color);
+  }
+
+  return dot.userData.materials[shape];
+}
+
+function syncVoxelAppearance(dot, { hovered: isHovered = false } = {}) {
+  const coord = dot.userData.coord;
+  const isFilled = voxelData.has(coord);
+  const shape = getVoxelShape(dot);
+  const color = isHovered ? COLORS.hover : getVoxelColor(coord);
+  const material = ensureVoxelMaterial(dot, shape);
+
+  if (dot.geometry !== getGeometryForShape(shape)) {
+    dot.geometry = getGeometryForShape(shape);
+  }
+
+  if (dot.material !== material) {
+    dot.material = material;
+  }
+
+  setMaterialColor(material, color);
+
+  const scale = isHovered && !isFilled ? voxelSize : isFilled ? voxelSize : voxelSize * 0.5;
+  if (shape === 'cube') {
+    dot.scale.set(scale, scale, scale);
+  } else {
+    dot.scale.set(scale, scale, 1);
+  }
+
+  const shouldResetRotation =
+    shape === 'cube' ||
+    (presentationMode === PRESENTATION_MODES.MODE_3D && shape !== 'circle');
+
+  if (shouldResetRotation) {
+    dot.rotation.set(0, 0, 0);
+  }
+
+  dot.userData.shape = shape;
+}
+
+function syncAllVoxelAppearance() {
+  for (const dot of dots) {
+    syncVoxelAppearance(dot, { hovered: dot === hovered });
+  }
+}
+
+function updatePresentationTransforms() {
+  for (const dot of dots) {
+    if (!dot.visible) continue;
+
+    const shape = dot.userData.shape;
+    const shouldBillboard =
+      shape === 'plane' ||
+      (presentationMode === PRESENTATION_MODES.MODE_3D && shape === 'circle');
+
+    if (shouldBillboard) {
+      if (dot.parent) {
+        dot.parent.getWorldQuaternion(tempParentQuaternion);
+        camera.getWorldQuaternion(tempCameraQuaternion);
+        dot.quaternion
+          .copy(tempParentQuaternion)
+          .invert()
+          .multiply(tempCameraQuaternion);
+      } else {
+        camera.getWorldQuaternion(dot.quaternion);
+      }
+      continue;
+    }
+
+    dot.rotation.set(0, 0, 0);
+  }
+}
 
 // Create all dots
 const dots = [];
 for (let x = 0; x < pointsPerAxis; x++) {
   for (let y = 0; y < pointsPerAxis; y++) {
     for (let z = 0; z < pointsPerAxis; z++) {
-      const mesh = new THREE.Sprite(baseMaterial.clone());
-      mesh.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1);
+      const mesh = new THREE.Mesh(squareGeometry, createPlaneMaterial(COLORS.base));
       mesh.position.set(
         (x - pointsPerAxis / 2 + 0.5) * voxelSize,
         (y - pointsPerAxis / 2 + 0.5) * voxelSize,
         (z - pointsPerAxis / 2 + 0.5) * voxelSize
       );
-      mesh.userData = { coord: `${x},${y},${z}` };
+      mesh.userData = {
+        coord: `${x},${y},${z}`,
+        materials: { plane: mesh.material },
+        shape: 'plane',
+      };
+      syncVoxelAppearance(mesh);
       voxelGroup.add(mesh);
       dots.push(mesh);
     }
@@ -89,9 +264,8 @@ const undoManager = new UndoManager(
   voxelData,
   dots,
   updateVoxelVisibility,
-  COLORS,
-  voxelSize,
-  baseMaterial
+  syncVoxelAppearance,
+  COLORS
 );
 
 updateLayerVisibility();
@@ -112,22 +286,7 @@ function updateMouseFromEvent(e) {
 
 function clearHoveredVoxel() {
   if (!hovered) return;
-
-  const coord = hovered.userData.coord;
-  const isFilled = voxelData.has(coord);
-  const color = isFilled ? voxelData.get(coord) : COLORS.base;
-
-  if (!isFilled) {
-    hovered.material = baseMaterial;
-  }
-
-  hovered.material.color.set(color);
-  hovered.scale.set(
-    voxelSize * (isFilled ? 1.0 : 0.5),
-    voxelSize * (isFilled ? 1.0 : 0.5),
-    1
-  );
-
+  syncVoxelAppearance(hovered);
   hovered = null;
 }
 
@@ -186,6 +345,7 @@ function onMouseLeave() {
 function tryPaintVoxel(e) {
   if (fillMode) return false;
 
+  updatePresentationTransforms();
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster
     .intersectObjects(dots, false)
@@ -213,25 +373,17 @@ function tryPaintVoxel(e) {
 
   if (isDeleteMode) {
     voxelData.delete(coord);
-    obj.material = baseMaterial;
-    obj.material.color.set(COLORS.base);
-    obj.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1);
   } else {
     voxelData.set(coord, selectedColorRef.value);
-    if (obj.material === baseMaterial) {
-      obj.material = obj.material.clone();
-    }
-    obj.material.color.set(selectedColorRef.value);
-    obj.scale.set(voxelSize, voxelSize, 1);
   }
 
-  // Set the final color
-  obj.material.color.set(newColor);
+  syncVoxelAppearance(obj, { hovered: obj === hovered });
   return true;
 }
 
 function fillAtVoxel(e) {
   // Use the raycaster to find the target voxel
+  updatePresentationTransforms();
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster
     .intersectObjects(dots, false)
@@ -316,15 +468,7 @@ function fillAtVoxel(e) {
 
     const dot = dots.find((d) => d.userData.coord === coordStr);
     if (dot) {
-      if (dot.material === baseMaterial) {
-        dot.material = dot.material.clone();
-      }
-      dot.material.color.set(newColor);
-      dot.scale.set(
-        newColor === COLORS.base ? voxelSize * 0.5 : voxelSize,
-        voxelSize,
-        1
-      );
+      syncVoxelAppearance(dot, { hovered: dot === hovered });
     }
 
     // Process neighboring voxels.
@@ -452,6 +596,7 @@ function animate() {
   requestAnimationFrame(animate);
 
   clearHoveredVoxel();
+  updatePresentationTransforms();
 
   if (isPointerInCanvas) {
     raycaster.setFromCamera(mouse, camera);
@@ -461,14 +606,7 @@ function animate() {
 
     if (intersects.length > 0) {
       hovered = intersects[0].object;
-
-      // Prevent shared base material from being mutated
-      if (hovered.material === baseMaterial) {
-        hovered.material = hovered.material.clone();
-      }
-
-      hovered.material.color.set(COLORS.hover);
-      hovered.scale.set(voxelSize, voxelSize, 1);
+      syncVoxelAppearance(hovered, { hovered: true });
     }
   }
 
@@ -494,10 +632,19 @@ function dispatchModeChanged(mode, value) {
   );
 }
 
+function dispatchPresentationModeChanged() {
+  document.dispatchEvent(
+    new CustomEvent('presentationModeChanged', {
+      detail: { mode: presentationMode },
+    })
+  );
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   Palette.loadBuiltInPalette('dawnbringer32', selectedColorRef);
   undoManager.dispatchUndoRedoChanged();
   dispatchVisibleLayerChanged();
+  dispatchPresentationModeChanged();
   dispatchModeChanged('grid', showEmptyVoxels);
   dispatchModeChanged('paint', true);
 });
@@ -551,6 +698,24 @@ function toggleGridVisibility() {
   dispatchModeChanged('grid', showEmptyVoxels);
 }
 
+function setPresentationMode(mode) {
+  if (
+    mode !== PRESENTATION_MODES.MODE_2D &&
+    mode !== PRESENTATION_MODES.MODE_3D
+  ) {
+    return;
+  }
+
+  if (presentationMode === mode) return;
+
+  presentationMode = mode;
+  clearHoveredVoxel();
+  syncAllVoxelAppearance();
+  updatePresentationTransforms();
+  updateVoxelVisibility();
+  dispatchPresentationModeChanged();
+}
+
 function setToolMode(mode) {
   // Valid modes: 'paint', 'fill'
 
@@ -580,9 +745,8 @@ function resetModel() {
   Model.resetModel(
     voxelData,
     dots,
-    COLORS,
-    voxelSize,
     undoManager,
+    syncVoxelAppearance,
     updateVoxelVisibility
   );
 
@@ -596,9 +760,8 @@ function importModel() {
   Model.importModel(
     voxelData,
     dots,
-    COLORS,
-    voxelSize,
     undoManager,
+    syncVoxelAppearance,
     updateVoxelVisibility,
     () => {
       Volumetrik.jumpToTopLayer();
@@ -648,6 +811,8 @@ window.Volumetrik = {
   jumpToBottomLayer,
   toggleXrayMode,
   toggleGridVisibility,
+  setPresentationMode,
+  getPresentationMode: () => presentationMode,
   toggleFillMode,
   setToolMode,
   isPaintMode: () => !fillMode,

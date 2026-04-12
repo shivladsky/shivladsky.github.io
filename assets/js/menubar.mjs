@@ -175,6 +175,28 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDropdownMinWidth(dropdown);
   });
 
+  document.addEventListener('presentationModeChanged', (event) => {
+    const { mode } = event.detail;
+    const modeToElementId = {
+      '2d': 'setPresentation2D',
+      '3d': 'setPresentation3D',
+    };
+
+    Object.values(modeToElementId).forEach((elementId) => {
+      const menuItem = document.getElementById(elementId);
+      if (menuItem) {
+        menuItem.classList.toggle('checked', elementId === modeToElementId[mode]);
+      }
+    });
+
+    const activeMenuItem = document.getElementById(modeToElementId[mode]);
+    const dropdown = activeMenuItem ? activeMenuItem.closest('.dropdown') : null;
+    if (!dropdown) return;
+
+    syncDropdownCheckmarks(dropdown);
+    updateDropdownMinWidth(dropdown);
+  });
+
   // Dynamically build the Palette menu dropdown
   const paletteDropdown = document.querySelector('#paletteMenu + .dropdown');
   if (paletteDropdown) {
@@ -290,6 +312,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- VIEW MENU DROPDOWN ITEM CLICKS ---
+  document.getElementById('setPresentation2D').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.setPresentationMode('2d');
+  });
+
+  document.getElementById('setPresentation3D').addEventListener('click', (e) => {
+    e.preventDefault();
+    window.Volumetrik.setPresentationMode('3d');
+  });
+
   document.getElementById('upOneLayer').addEventListener('click', (e) => {
     e.preventDefault();
     window.Volumetrik.increaseVisibleLayers();

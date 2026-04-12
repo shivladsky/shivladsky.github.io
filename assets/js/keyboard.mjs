@@ -60,6 +60,20 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && key === '2') {
+      window.Volumetrik.setPresentationMode('2d');
+      flashMenuLabel('renderMenu');
+      e.preventDefault();
+      return;
+    }
+
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && key === '3') {
+      window.Volumetrik.setPresentationMode('3d');
+      flashMenuLabel('renderMenu');
+      e.preventDefault();
+      return;
+    }
+
     // --- LAYER CONTROLS ---
     if (isShift && key === 'q') {
       window.Volumetrik.jumpToBottomLayer();

@@ -1,16 +1,14 @@
 export function resetModel(
   voxelData,
   dots,
-  COLORS,
-  voxelSize,
   undoManager,
+  syncVoxelAppearance,
   updateVoxelVisibility
 ) {
   voxelData.clear();
 
   for (const dot of dots) {
-    dot.material.color.set(COLORS.base);
-    dot.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1); // Back to default size
+    syncVoxelAppearance(dot);
   }
 
   undoManager.clearHistory();
@@ -20,9 +18,8 @@ export function resetModel(
 export function importModel(
   voxelData,
   dots,
-  COLORS,
-  voxelSize,
   undoManager,
+  syncVoxelAppearance,
   updateVoxelVisibility,
   onImportLoaded
 ) {
@@ -38,9 +35,8 @@ export function importModel(
         data,
         voxelData,
         dots,
-        COLORS,
-        voxelSize,
         undoManager,
+        syncVoxelAppearance,
         updateVoxelVisibility,
         onImportLoaded
       );
@@ -54,17 +50,15 @@ function loadModel(
   data,
   voxelData,
   dots,
-  COLORS,
-  voxelSize,
   undoManager,
+  syncVoxelAppearance,
   updateVoxelVisibility,
   onImportLoaded
 ) {
   voxelData.clear();
 
   for (const dot of dots) {
-    dot.material.color.set(COLORS.base);
-    dot.scale.set(voxelSize * 0.5, voxelSize * 0.5, 1);
+    syncVoxelAppearance(dot);
   }
 
   for (const { x, y, z, color } of data) {
@@ -72,11 +66,7 @@ function loadModel(
     voxelData.set(coord, color);
     const dot = dots.find((d) => d.userData.coord === coord);
     if (dot) {
-      if (dot.material.color.getHexString() === COLORS.base.replace('#', '')) {
-        dot.material = dot.material.clone();
-      }
-      dot.material.color.set(color);
-      dot.scale.set(voxelSize, voxelSize, 1);
+      syncVoxelAppearance(dot);
     }
   }
 

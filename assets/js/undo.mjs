@@ -3,16 +3,14 @@ export class UndoManager {
     voxelData,
     dots,
     updateVoxelVisibility,
-    COLORS,
-    voxelSize,
-    baseMaterial
+    syncVoxelAppearance,
+    COLORS
   ) {
     this.voxelData = voxelData;
     this.dots = dots;
     this.updateVoxelVisibility = updateVoxelVisibility;
+    this.syncVoxelAppearance = syncVoxelAppearance;
     this.COLORS = COLORS;
-    this.baseMaterial = baseMaterial;
-    this.voxelSize = voxelSize;
     this.undoStack = [];
     this.redoStack = [];
     this.currentStroke = null;
@@ -56,17 +54,11 @@ export class UndoManager {
 
       if (oldColor === this.COLORS.base) {
         this.voxelData.delete(coord);
-        dot.material = this.baseMaterial;
-        dot.material.color.set(this.COLORS.base);
-        dot.scale.set(this.voxelSize * 0.5, this.voxelSize * 0.5, 1);
       } else {
         this.voxelData.set(coord, oldColor);
-        if (dot.material === this.baseMaterial) {
-          dot.material = dot.material.clone();
-        }
-        dot.material.color.set(oldColor);
-        dot.scale.set(this.voxelSize, this.voxelSize, 1);
       }
+
+      this.syncVoxelAppearance(dot);
     }
 
     this.redoStack.push(stroke);
@@ -84,19 +76,10 @@ export class UndoManager {
 
       if (newColor === this.COLORS.base) {
         this.voxelData.delete(coord);
-        dot.material = this.baseMaterial;
-        dot.material.color.set(this.COLORS.base);
-        dot.scale.set(this.voxelSize * 0.5, this.voxelSize * 0.5, 1);
       } else {
         this.voxelData.set(coord, newColor);
-        if (dot.material === this.baseMaterial) {
-          dot.material = dot.material.clone();
-        }
-        dot.material.color.set(newColor);
-        dot.scale.set(this.voxelSize, this.voxelSize, 1);
       }
-
-      dot.material.color.set(newColor);
+      this.syncVoxelAppearance(dot);
     }
 
     this.undoStack.push(stroke);

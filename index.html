@@ -53,6 +53,14 @@
       </div>
 
       <div class="menu-item">
+        <button type="button" class="menu-label" id="renderMenu">Render</button>
+        <div class="dropdown">
+          <button type="button" class="dropdown-item" id="setPresentation2D">2D</button>
+          <button type="button" class="dropdown-item" id="setPresentation3D">3D</button>
+        </div>
+      </div>
+
+      <div class="menu-item">
         <button type="button" class="menu-label" id="paletteMenu">Palette</button>
         <div class="dropdown">
           <!-- Built-in palettes get populated dynamically here from menubar.mjs -->
@@ -71,6 +79,10 @@
     </div>
 
     <div id="statusBar" aria-live="polite">
+      <span class="status-item">
+        <span class="status-label">Rend:</span>
+        <span id="renderStatusText">2D</span>
+      </span>
       <span class="status-item">
         <span class="status-label">Grid:</span>
         <span id="gridStatusText">Visible</span>
